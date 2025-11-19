@@ -4,7 +4,7 @@ project(shiny LANGUAGES C VERSION 0.0.1)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-add_library(${PROJECT_NAME} STATIC)
+add_library(${PROJECT_NAME} SHARED)
 
 add_subdirectory(src)
 
