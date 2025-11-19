@@ -5,6 +5,11 @@ FetchContent_Declare(sdl
 	GIT_TAG release-3.2.26
 )
 
+FetchContent_Declare(sdl_ttf
+	GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+	GIT_TAG release-3.2.2
+)
+
 find_package(SDL3 QUIET)
 find_package(SDL3_ttf QUIET)
 
