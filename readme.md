@@ -18,5 +18,5 @@ items. The name Shiny is a play on this, as a kind of shiny UI.
 
 ## Showcase
 
-The [caw](https://github.com/kraxarn/caw) is currently being built alongside Shiny,
+The [caw](https://github.com/kraxarn/caw) tracker is currently being built alongside Shiny,
 but neither are finished enough to use it as a showcase.
