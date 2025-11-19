@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.16)
+project(shiny LANGUAGES C VERSION 0.0.1)
+
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+if (ANDROID)
+	add_library(${PROJECT_NAME} SHARED)
+else ()
+	add_library(${PROJECT_NAME} STATIC)
+endif ()
+
+add_subdirectory(src)
+
+include(deps/clay.cmake)
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+	"${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
