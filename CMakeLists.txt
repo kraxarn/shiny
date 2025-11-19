@@ -10,6 +10,6 @@ add_subdirectory(src)
 
 include(deps/clay.cmake)
 
-target_include_directories(${PROJECT_NAME} PRIVATE
+target_include_directories(${PROJECT_NAME} PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
