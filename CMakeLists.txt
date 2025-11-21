@@ -10,6 +10,8 @@ add_subdirectory(src)
 
 include(deps/clay.cmake)
 include(deps/sdl.cmake)
+include(deps/freetype.cmake)
+include(deps/stb.cmake)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/include"
