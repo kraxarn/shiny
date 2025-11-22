@@ -10,20 +10,20 @@
 #include <freetype/fttypes.h>
 
 #include <SDL3/SDL_error.h>
-#include <SDL3/SDL_iostream.h>
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_properties.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
 
 static FT_Library ft_library = nullptr;
-static FT_Long ft_face_size = 0;
-static FT_Face ft_faces[SDL_MAX_UINT8];
 
 static SDL_Renderer *sdl_renderer = nullptr;
 static Sint64 sdl_texture_size = 0;
 
-static SDL_PropertiesID props;
+typedef struct shiny_font_t
+{
+	FT_Face face;
+} shiny_font_t;
 
 void *ft_alloc([[maybe_unused]] FT_Memory memory, const long size)
 {
@@ -75,12 +75,6 @@ bool shiny_font_init(SDL_Renderer *renderer)
 		return SDL_SetError("Invalid texture atlas size: %lld", sdl_texture_size);
 	}
 
-	props = SDL_CreateProperties();
-	if (props == 0)
-	{
-		return false;
-	}
-
 	return true;
 }
 
@@ -92,35 +86,34 @@ bool shiny_font_destroy()
 		return SDL_SetError("%s", FT_Error_String(error));
 	}
 
-	ft_face_size = 0;
 	ft_library = nullptr;
-
 	return true;
 }
 
-shiny_font_id shiny_font_load(const Uint8 *data, const long size)
+shiny_font_t *shiny_font_open(const Uint8 *data, const long size)
 {
-	if (ft_face_size >= sizeof(ft_faces) / sizeof(FT_Face))
-	{
-		SDL_SetError("Too many fonts already loaded, why do you need so many?");
-		return 0;
-	}
-
 	FT_Face face;
 	FT_Error error = FT_New_Memory_Face(ft_library, data, size, 0, &face);
 	if (error != FT_Err_Ok)
 	{
 		SDL_SetError("%s", FT_Error_String(error));
-		return 0;
+		return nullptr;
 	}
 
 	error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
 	if (error != FT_Err_Ok)
 	{
 		SDL_SetError("%s", FT_Error_String(error));
-		return 0;
+		return nullptr;
 	}
 
-	ft_faces[ft_face_size++] = face;
-	return (shiny_font_id) ft_face_size;
+	shiny_font_t *font = SDL_malloc(sizeof(shiny_font_t));
+	font->face = face;
+	return font;
+}
+
+void shiny_font_close(shiny_font_t *font)
+{
+	FT_Done_Face(font->face);
+	SDL_free(font);
 }
