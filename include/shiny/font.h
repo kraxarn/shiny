@@ -7,14 +7,12 @@
 
 typedef struct shiny_font_t shiny_font_t;
 
-bool shiny_font_init(SDL_Renderer *renderer);
+shiny_font_t *shiny_font_create(SDL_Renderer *renderer, const Uint8 *data);
 
-bool shiny_font_destroy();
-
-shiny_font_t *shiny_font_open(const Uint8 *data, long size);
+bool shiny_font_bake(shiny_font_t *font);
 
 void shiny_font_close(shiny_font_t *font);
 
-bool shiny_font_set_size(const shiny_font_t *font, float size);
+void shiny_font_set_size(shiny_font_t *font, float size);
 
 void shiny_font_set_color(shiny_font_t *font, shiny_color_t color);
