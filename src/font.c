@@ -68,12 +68,10 @@ bool shiny_font_init(SDL_Renderer *renderer)
 
 	const SDL_PropertiesID renderer_props = SDL_GetRendererProperties(renderer);
 	const Sint64 max_texture_size = SDL_GetNumberProperty(renderer_props, SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER, 0);
-	sdl_texture_size = SDL_min(max_texture_size, 1024);
-
-	if (sdl_texture_size <= 0)
-	{
-		return SDL_SetError("Invalid texture atlas size: %lld", sdl_texture_size);
-	}
+	constexpr Sint64 default_texture_size = 1024;
+	sdl_texture_size = max_texture_size > 0 && default_texture_size > max_texture_size
+		? max_texture_size
+		: default_texture_size;
 
 	return true;
 }
