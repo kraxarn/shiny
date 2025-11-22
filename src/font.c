@@ -1,4 +1,5 @@
 #include "shiny/font.h"
+#include "shiny/color.h"
 #include "shiny/internal/logcategory.h"
 
 #include "stb_rect_pack.h"
@@ -23,6 +24,7 @@ static Sint64 sdl_texture_size = 0;
 typedef struct shiny_font_t
 {
 	FT_Face face;
+	shiny_color_t color;
 } shiny_font_t;
 
 void *ft_alloc([[maybe_unused]] FT_Memory memory, const long size)
@@ -124,4 +126,9 @@ bool shiny_font_set_size(const shiny_font_t *font, const float size)
 		return SDL_SetError("%s", FT_Error_String(error));
 	}
 	return true;
+}
+
+void shiny_font_set_color(shiny_font_t *font, const shiny_color_t color)
+{
+	font->color = color;
 }
