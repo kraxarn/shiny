@@ -115,3 +115,13 @@ void shiny_font_close(shiny_font_t *font)
 	FT_Done_Face(font->face);
 	SDL_free(font);
 }
+
+bool shiny_font_set_size(const shiny_font_t *font, const float size)
+{
+	const FT_Error error = FT_Set_Char_Size(font->face, 0, (long) SDL_roundf(size * 64), 0, 0);
+	if (error != FT_Err_Ok)
+	{
+		return SDL_SetError("%s", FT_Error_String(error));
+	}
+	return true;
+}

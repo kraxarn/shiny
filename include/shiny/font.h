@@ -12,3 +12,5 @@ bool shiny_font_destroy();
 shiny_font_t *shiny_font_open(const Uint8 *data, long size);
 
 void shiny_font_close(shiny_font_t *font);
+
+bool shiny_font_set_size(const shiny_font_t *font, float size);
