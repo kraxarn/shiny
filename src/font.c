@@ -136,7 +136,7 @@ bool shiny_font_draw_text(const shiny_font_t *font, const char *text, const Sint
 	return result;
 }
 
-void shiny_font_close(shiny_font_t *font)
+void shiny_font_destroy(shiny_font_t *font)
 {
 	SDL_DestroyPalette(font->palette);
 	SDL_DestroySurface(font->glyphs);
