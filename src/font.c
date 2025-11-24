@@ -102,17 +102,17 @@ bool shiny_font_bake(shiny_font_t *font)
 	return font->texture != nullptr;
 }
 
-bool shiny_font_draw_text(const shiny_font_t *font, const char *text)
+bool shiny_font_draw_text(const shiny_font_t *font, const char *text, const Sint32 length)
 {
 	auto result = true;
 
 	auto x = 0.F;
 	auto y = 0.F;
 
-	for (const char *chr = text; chr != nullptr; chr++)
+	for (auto i = 0; i < length; i++)
 	{
 		stbtt_aligned_quad quad;
-		stbtt_GetBakedQuad(font->chars, font->glyphs->w, font->glyphs->h, (*chr) - ascii_begin, &x, &y, &quad, 1);
+		stbtt_GetBakedQuad(font->chars, font->glyphs->w, font->glyphs->h, text[i] - ascii_begin, &x, &y, &quad, 1);
 
 		const float width = quad.x1 - quad.x0;
 		const float height = quad.y1 - quad.y0;
