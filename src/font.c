@@ -139,7 +139,6 @@ bool shiny_font_draw_text(const shiny_font_t *font, const float x, const float y
 
 void shiny_font_destroy(shiny_font_t *font)
 {
-	SDL_DestroyPalette(font->palette);
 	SDL_DestroySurface(font->glyphs);
 	SDL_DestroyTexture(font->texture);
 	SDL_free(font);
