@@ -160,7 +160,17 @@ bool shiny_font_bake(shiny_font_t *font)
 
 	// TODO: Should be safe to destroy surface after creating the texture
 	font->glyphs_texture = SDL_CreateTextureFromSurface(font->renderer, font->glyphs_surface);
-	return font->glyphs_texture != nullptr;
+	if (font->glyphs_texture == nullptr)
+	{
+		return false;
+	}
+
+	if (!SDL_SetTextureBlendMode(font->glyphs_texture, SDL_BLENDMODE_BLEND))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 bool shiny_font_draw_text(const shiny_font_t *font, const float x,
