@@ -115,6 +115,7 @@ bool shiny_font_bake(shiny_font_t *font)
 	font->glyphs = SDL_CreateTextureFromSurface(font->renderer, surface);
 	if (font->glyphs == nullptr)
 	{
+		SDL_DestroySurface(surface);
 		return false;
 	}
 
