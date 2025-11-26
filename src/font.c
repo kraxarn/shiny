@@ -20,9 +20,7 @@ typedef struct shiny_font_t
 {
 	const Uint8 *data;
 	SDL_Renderer *renderer;
-
-	SDL_Surface *glyphs_surface;
-	SDL_Texture *glyphs_texture;
+	SDL_Texture *glyphs;
 
 	SDL_Color color;
 
@@ -118,30 +116,19 @@ static bool shiny_build_palette(SDL_Surface *surface, const SDL_Color color)
 
 bool shiny_font_bake(shiny_font_t *font)
 {
-	if (font->glyphs_texture != nullptr)
-	{
-		SDL_DestroyTexture(font->glyphs_texture);
-	}
-
-	if (font->glyphs_surface != nullptr)
-	{
-		SDL_DestroySurface(font->glyphs_surface);
-	}
-
 	const auto atlas_size = (int) shiny_font_texture_size(font->renderer);
-	font->glyphs_surface = SDL_CreateSurface(atlas_size, atlas_size, SDL_PIXELFORMAT_INDEX8);
-	if (font->glyphs_surface == nullptr)
+	SDL_Surface *surface = SDL_CreateSurface(atlas_size, atlas_size, SDL_PIXELFORMAT_INDEX8);
+	if (surface == nullptr)
 	{
 		return false;
 	}
 
-	if (!shiny_build_palette(font->glyphs_surface, font->color))
+	if (!shiny_build_palette(surface, font->color))
 	{
 		return SDL_SetError("Invalid surface palette");
 	}
 
-	stbtt_BakeFontBitmap(font->data, 0, font->size, font->glyphs_surface->pixels,
-		font->glyphs_surface->w, font->glyphs_surface->h,
+	stbtt_BakeFontBitmap(font->data, 0, font->size, surface->pixels,surface->w, surface->h,
 		ascii_begin, ascii_size, font->baked_chars
 	);
 
@@ -154,13 +141,15 @@ bool shiny_font_bake(shiny_font_t *font)
 	}
 
 	// TODO: Should be safe to destroy surface after creating the texture
-	font->glyphs_texture = SDL_CreateTextureFromSurface(font->renderer, font->glyphs_surface);
-	if (font->glyphs_texture == nullptr)
+	font->glyphs = SDL_CreateTextureFromSurface(font->renderer, surface);
+	if (font->glyphs == nullptr)
 	{
 		return false;
 	}
 
-	if (!SDL_SetTextureBlendMode(font->glyphs_texture, SDL_BLENDMODE_BLEND))
+	SDL_DestroySurface(surface);
+
+	if (!SDL_SetTextureBlendMode(font->glyphs, SDL_BLENDMODE_BLEND))
 	{
 		return false;
 	}
@@ -191,7 +180,7 @@ bool shiny_font_draw_text(const shiny_font_t *font, const float x,
 			.h = src.h,
 		};
 
-		if (!SDL_RenderTexture(font->renderer, font->glyphs_texture, &src, &dst))
+		if (!SDL_RenderTexture(font->renderer, font->glyphs, &src, &dst))
 		{
 			return false;
 		}
@@ -204,7 +193,6 @@ bool shiny_font_draw_text(const shiny_font_t *font, const float x,
 
 void shiny_font_destroy(shiny_font_t *font)
 {
-	SDL_DestroySurface(font->glyphs_surface);
-	SDL_DestroyTexture(font->glyphs_texture);
+	SDL_DestroyTexture(font->glyphs);
 	SDL_free(font);
 }
