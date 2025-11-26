@@ -108,11 +108,6 @@ static bool shiny_build_palette(SDL_Surface *surface, const SDL_Color color)
 		return false;
 	}
 
-	if (!SDL_SetSurfacePalette(surface, palette)) // TODO: Shouldn't be needed
-	{
-		return false;
-	}
-
 	return true;
 }
 
