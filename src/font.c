@@ -44,7 +44,8 @@ static Sint64 shiny_font_texture_size(SDL_Renderer *renderer)
 	const SDL_PropertiesID props = SDL_GetRendererProperties(renderer);
 	const char *name = SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER;
 	constexpr Sint64 default_value = 1024;
-	return SDL_GetNumberProperty(props, name, default_value);
+	const Sint64 max_size = SDL_GetNumberProperty(props, name, default_value);
+	return SDL_min(max_size, default_value);
 }
 
 static bool shiny_font_parse(shiny_font_t *font)
