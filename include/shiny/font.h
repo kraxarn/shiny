@@ -17,4 +17,4 @@ void shiny_font_set_size(shiny_font_t *font, float size);
 
 void shiny_font_set_color(shiny_font_t *font, shiny_color_t color);
 
-bool shiny_font_draw_text(const shiny_font_t *font, float x, float y, const char *text, Sint32 length);
+bool shiny_font_draw_text(shiny_font_t *font, float x, float y, const char *text, Sint32 length);
