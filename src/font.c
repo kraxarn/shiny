@@ -59,31 +59,6 @@ static bool shiny_font_parse(shiny_font_t *font)
 	return true;
 }
 
-// TODO: Move around functions instead
-bool shiny_font_bake(shiny_font_t *font);
-
-shiny_font_t *shiny_font_create(SDL_Renderer *renderer, const Uint8 *data, const float font_size)
-{
-	shiny_font_t *font = SDL_calloc(1, sizeof(shiny_font_t));
-	if (font == nullptr)
-	{
-		return nullptr;
-	}
-
-	font->renderer = renderer;
-	font->data = data;
-	font->size = font_size;
-	font->color = shiny_sdl_theme_color(SHINY_COLOR_FOREGROUND);
-
-	if (!shiny_font_parse(font) || !shiny_font_bake(font))
-	{
-		SDL_free(font);
-		return nullptr;
-	}
-
-	return font;
-}
-
 static bool shiny_build_palette(SDL_Surface *surface, const SDL_Color color)
 {
 	constexpr auto color_count = 256; // INDEX8
@@ -151,6 +126,28 @@ bool shiny_font_bake(shiny_font_t *font)
 	}
 
 	return true;
+}
+
+shiny_font_t *shiny_font_create(SDL_Renderer *renderer, const Uint8 *data, const float font_size)
+{
+	shiny_font_t *font = SDL_calloc(1, sizeof(shiny_font_t));
+	if (font == nullptr)
+	{
+		return nullptr;
+	}
+
+	font->renderer = renderer;
+	font->data = data;
+	font->size = font_size;
+	font->color = shiny_sdl_theme_color(SHINY_COLOR_FOREGROUND);
+
+	if (!shiny_font_parse(font) || !shiny_font_bake(font))
+	{
+		SDL_free(font);
+		return nullptr;
+	}
+
+	return font;
 }
 
 bool shiny_font_draw_text(const shiny_font_t *font, const float x,
