@@ -1,12 +1,14 @@
 #include "shiny/font.h"
 #include "shiny/themekey.h"
 #include "shiny/internal/color.h"
+#include "shiny/internal/logcategory.h"
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 
 #include <SDL3/SDL_blendmode.h>
 #include <SDL3/SDL_error.h>
+#include <SDL3/SDL_log.h>
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_properties.h>
 #include <SDL3/SDL_rect.h>
@@ -89,6 +91,8 @@ static bool shiny_build_palette(SDL_Surface *surface, const SDL_Color color)
 bool shiny_font_bake(shiny_font_t *font)
 {
 	const auto atlas_size = (int) shiny_font_texture_size(font->renderer);
+	SDL_LogDebug(SHINY_LOG_CATEGORY_FONT, "Baking font with size %d", atlas_size);
+
 	SDL_Surface *surface = SDL_CreateSurface(atlas_size, atlas_size, SDL_PIXELFORMAT_INDEX8);
 	if (surface == nullptr)
 	{
