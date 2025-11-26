@@ -1,9 +1,11 @@
 #include "shiny/font.h"
+#include "shiny/themekey.h"
 #include "shiny/internal/color.h"
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 
+#include <SDL3/SDL_blendmode.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_properties.h>
