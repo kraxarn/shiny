@@ -145,7 +145,10 @@ bool shiny_font_bake(shiny_font_t *font)
 		return false;
 	}
 
-	shiny_build_palette(font->glyphs_surface, font->color);
+	if (!shiny_build_palette(font->glyphs_surface, font->color))
+	{
+		return SDL_SetError("Invalid surface palette");
+	}
 
 	stbtt_BakeFontBitmap(font->data, 0, font->size, font->glyphs_surface->pixels,
 		font->glyphs_surface->w, font->glyphs_surface->h,
