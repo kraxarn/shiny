@@ -16,9 +16,6 @@
 static constexpr auto ascii_begin = 32;
 static constexpr auto ascii_size = 96;
 
-static constexpr auto atlas_width = 1024;
-static constexpr auto atlas_height = 1024;
-
 typedef struct shiny_font_t
 {
 	const Uint8 *data;
@@ -40,15 +37,12 @@ typedef struct shiny_font_t
 	float baseline;
 } shiny_font_t;
 
-Sint64 shiny_font_default_texture_size(SDL_Renderer *renderer)
+static Sint64 shiny_font_texture_size(SDL_Renderer *renderer)
 {
-	const SDL_PropertiesID renderer_props = SDL_GetRendererProperties(renderer);
-	const Sint64 max_texture_size = SDL_GetNumberProperty(renderer_props,
-		SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER, 0);
-	constexpr Sint64 default_texture_size = 1024;
-	return max_texture_size > 0 && default_texture_size > max_texture_size
-		? max_texture_size
-		: default_texture_size;
+	const SDL_PropertiesID props = SDL_GetRendererProperties(renderer);
+	const char *name = SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER;
+	constexpr Sint64 default_value = 1024;
+	return SDL_GetNumberProperty(props, name, default_value);
 }
 
 static bool shiny_font_parse(shiny_font_t *font)
@@ -134,7 +128,8 @@ bool shiny_font_bake(shiny_font_t *font)
 		SDL_DestroySurface(font->glyphs_surface);
 	}
 
-	font->glyphs_surface = SDL_CreateSurface(atlas_width, atlas_height, SDL_PIXELFORMAT_INDEX8);
+	const auto atlas_size = (int) shiny_font_texture_size(font->renderer);
+	font->glyphs_surface = SDL_CreateSurface(atlas_size, atlas_size, SDL_PIXELFORMAT_INDEX8);
 	if (font->glyphs_surface == nullptr)
 	{
 		return false;
