@@ -15,6 +15,7 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_surface.h>
+#include <SDL3/SDL_timer.h>
 
 // ASCII printable characters
 static constexpr auto ascii_begin = 32;
@@ -91,6 +92,8 @@ static bool shiny_build_palette(SDL_Surface *surface, const SDL_Color color)
 
 bool shiny_font_bake(shiny_font_t *font)
 {
+	const Uint64 start = SDL_GetTicks();
+
 	const auto atlas_size = (int) shiny_font_texture_size(font->renderer);
 	SDL_LogDebug(SHINY_LOG_CATEGORY_FONT, "Baking font with size %d", atlas_size);
 
@@ -105,7 +108,7 @@ bool shiny_font_bake(shiny_font_t *font)
 		return SDL_SetError("Invalid surface palette");
 	}
 
-	stbtt_BakeFontBitmap(font->data, 0, font->size, surface->pixels,surface->w, surface->h,
+	stbtt_BakeFontBitmap(font->data, 0, font->size, surface->pixels, surface->w, surface->h,
 		ascii_begin, ascii_size, font->baked_chars
 	);
 
@@ -130,6 +133,9 @@ bool shiny_font_bake(shiny_font_t *font)
 	{
 		return false;
 	}
+
+	const Uint64 end = SDL_GetTicks();
+	SDL_LogDebug(SHINY_LOG_CATEGORY_FONT, "Baked font in %lld ms", end - start);
 
 	return true;
 }
