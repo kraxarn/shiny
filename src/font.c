@@ -1,10 +1,5 @@
 #include "shiny/font.h"
-#include "shiny/color.h"
 #include "shiny/internal/color.h"
-#include "shiny/internal/logcategory.h"
-
-#define STB_RECT_PACK_IMPLEMENTATION
-#include "stb_rect_pack.h"
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
