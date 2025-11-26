@@ -106,7 +106,7 @@ static bool shiny_build_palette(SDL_Surface *surface, const SDL_Color color)
 		colors[i].r = color.r;
 		colors[i].g = color.g;
 		colors[i].b = color.b;
-		colors[i].a = 0;
+		colors[i].a = i;
 	}
 
 	if (!SDL_SetPaletteColors(palette, colors, 0, color_count))
