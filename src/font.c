@@ -169,28 +169,67 @@ bool shiny_font_draw_text(const shiny_font_t *font, const float x,
 
 	for (auto i = 0; i < length; i++)
 	{
-		const char chr = text[i];
-		const stbtt_bakedchar *baked_char = font->baked_chars + chr - ascii_begin;
+		const auto codepoint = (int) text[i];
+		int advance_width;
+		int left_side_bearing;
+		stbtt_GetCodepointHMetrics(&font->info, codepoint, &advance_width, &left_side_bearing);
 
-		const SDL_FRect src = {
-			.x = (float) baked_char->x0,
-			.y = (float) baked_char->y0,
-			.w = (float) (baked_char->x1 - baked_char->x0),
-			.h = (float) (baked_char->y1 - baked_char->y0),
-		};
-		const SDL_FRect dst = {
-			.x = curr_x + baked_char->xoff,
-			.y = y + baked_char->yoff,
-			.w = src.w,
-			.h = src.h,
-		};
+		int bm_x0;
+		int bm_y0;
+		int bm_x1;
+		int bm_y1;
+		stbtt_GetCodepointBitmapBox(&font->info, codepoint, font->scale, font->scale,
+			&bm_x0, &bm_y0, &bm_x1, &bm_y1);
 
-		if (!SDL_RenderTexture(font->renderer, font->glyphs, &src, &dst))
+		const float curr_y = y + ((float) font->ascent * font->scale) + (float) bm_y0;
+
+		// TODO: This is probably the definition of terrible
+		SDL_Surface *surface = SDL_CreateSurface(advance_width, font->size, SDL_PIXELFORMAT_INDEX8);
+		if (surface == nullptr)
 		{
 			return false;
 		}
 
-		curr_x += baked_char->xadvance;
+		if (!shiny_build_palette(surface, font->color))
+		{
+			return false;
+		}
+
+		stbtt_MakeCodepointBitmap(&font->info, surface->pixels, surface->w, surface->h,
+			surface->w, font->scale, font->scale, codepoint);
+
+		// TODO: This is also REALLY bad
+		SDL_Texture *texture = SDL_CreateTextureFromSurface(font->renderer, surface);
+		if (texture == nullptr)
+		{
+			SDL_DestroySurface(surface);
+			return false;
+		}
+
+		if (!SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND))
+		{
+			return false;
+		}
+
+		const SDL_FRect dst = {
+			.x = curr_x,
+			.y = curr_y,
+			.w = (float) texture->w,
+			.h = (float) texture->h,
+		};
+		SDL_RenderTexture(font->renderer, texture, nullptr, &dst);
+
+		SDL_DestroyTexture(texture);
+		SDL_DestroySurface(surface);
+
+		curr_x += (float) advance_width * font->scale;
+
+		if (i < length - 1)
+		{
+			const auto next_codepoint = (int) text[i + 1];
+			const int kern = stbtt_GetCodepointKernAdvance(&font->info, codepoint, next_codepoint);
+			curr_x += (float) kern * font->scale;
+		}
 	}
 
 	return true;
