@@ -211,6 +211,11 @@ bool shiny_font_draw_text(const shiny_font_t *font, const float x,
 			return false;
 		}
 
+		if (!SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST))
+		{
+			return false;
+		}
+
 		const SDL_FRect dst = {
 			.x = curr_x,
 			.y = curr_y,
