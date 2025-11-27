@@ -184,7 +184,7 @@ bool shiny_font_draw_text(const shiny_font_t *font, const float x,
 		const float curr_y = y + ((float) font->ascent * font->scale) + (float) bm_y0;
 
 		// TODO: This is probably the definition of terrible
-		SDL_Surface *surface = SDL_CreateSurface(advance_width, font->size, SDL_PIXELFORMAT_INDEX8);
+		SDL_Surface *surface = SDL_CreateSurface(advance_width, (int) font->size, SDL_PIXELFORMAT_INDEX8);
 		if (surface == nullptr)
 		{
 			return false;
