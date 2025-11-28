@@ -3,65 +3,69 @@
 #include "shiny/internal/color.h"
 #include "shiny/internal/logcategory.h"
 
-#define STB_TRUETYPE_IMPLEMENTATION
-#include "stb_truetype.h"
-
+#include <SDL3/SDL_assert.h>
 #include <SDL3/SDL_blendmode.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_pixels.h>
-#include <SDL3/SDL_properties.h>
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_timer.h>
 
+// >.<
+#define STBTT_ifloor(x) ((int) SDL_floor(x))
+#define STBTT_iceil(x) ((int) SDL_ceil(x))
+#define STBTT_sqrt(x) SDL_sqrt(x)
+#define STBTT_pow(x,y) SDL_pow(x,y)
+#define STBTT_fmod(x,y) SDL_fmod(x,y)
+#define STBTT_cos(x) SDL_cos(x)
+#define STBTT_acos(x) SDL_acos(x)
+#define STBTT_fabs(x) SDL_fabs(x)
+#define STBTT_malloc(x,u) ((void)(u),SDL_malloc(x))
+#define STBTT_free(x,u) ((void)(u),SDL_free(x))
+#define STBTT_assert(x) SDL_assert(x)
+#define STBTT_strlen(x) SDL_strlen(x)
+#define STBTT_memcpy SDL_memcpy
+#define STBTT_memset SDL_memset
+
+#define STB_RECT_PACK_IMPLEMENTATION
+#include "stb_rect_pack.h"
+
+#define STB_TRUETYPE_IMPLEMENTATION
+#include "stb_truetype.h"
+
+// TODO: Debug only?
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 // ASCII printable characters
 static constexpr auto ascii_begin = 32;
 static constexpr auto ascii_size = 95;
+
+static constexpr auto font_size = 32;
+static constexpr auto glyph_padding = 4;
+
+typedef struct shiny_glyph_info_t
+{
+	int value; // TODO: Remove?
+	int offset_x;
+	int offset_y;
+	int advance_x;
+	SDL_Surface *image; // TODO: Move to temporary variable
+} shiny_glyph_info_t;
 
 typedef struct shiny_font_t
 {
 	const Uint8 *data;
 	SDL_Renderer *renderer;
-	SDL_Texture *glyphs;
-
 	SDL_Color color;
 
-	stbtt_bakedchar baked_chars[ascii_size];
-	stbtt_fontinfo info;
-
-	float size;
-	float scale;
-	int ascent;
-	int descent;
-	int line_gap;
-	float baseline;
+	SDL_Texture *texture;
+	SDL_Rect recs[ascii_size];
+	shiny_glyph_info_t glyphs[ascii_size];
 } shiny_font_t;
-
-static Sint64 shiny_font_texture_size(SDL_Renderer *renderer)
-{
-	const SDL_PropertiesID props = SDL_GetRendererProperties(renderer);
-	const char *name = SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER;
-	constexpr Sint64 default_value = 1024;
-	const Sint64 max_size = SDL_GetNumberProperty(props, name, default_value);
-	return SDL_min(max_size, default_value);
-}
-
-static bool shiny_font_parse(shiny_font_t *font)
-{
-	if (!stbtt_InitFont(&font->info, font->data, 0))
-	{
-		return SDL_SetError("Font initialisation error");
-	}
-
-	font->scale = stbtt_ScaleForPixelHeight(&font->info, font->size);
-	stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, &font->line_gap);
-	font->baseline = (float) font->ascent * font->scale;
-
-	return true;
-}
 
 static bool shiny_build_palette(SDL_Surface *surface, const SDL_Color color)
 {
@@ -82,54 +86,168 @@ static bool shiny_build_palette(SDL_Surface *surface, const SDL_Color color)
 		colors[i].a = i;
 	}
 
-	if (!SDL_SetPaletteColors(palette, colors, 0, color_count))
-	{
-		return false;
-	}
-
-	return true;
+	return SDL_SetPaletteColors(palette, colors, 0, color_count);
 }
 
 bool shiny_font_bake(shiny_font_t *font)
 {
 	const Uint64 start = SDL_GetTicks();
 
-	const auto atlas_size = (int) shiny_font_texture_size(font->renderer);
-	SDL_LogDebug(SHINY_LOG_CATEGORY_FONT, "Baking font with size %d", atlas_size);
+	shiny_glyph_info_t *glyphs = font->glyphs;
 
-	SDL_Surface *surface = SDL_CreateSurface(atlas_size, atlas_size, SDL_PIXELFORMAT_INDEX8);
-	if (surface == nullptr)
+	stbtt_fontinfo font_info;
+	if (!stbtt_InitFont(&font_info, font->data, 0))
 	{
 		return false;
 	}
 
-	if (!shiny_build_palette(surface, font->color))
-	{
-		return SDL_SetError("Invalid surface palette");
-	}
+	const float scale = stbtt_ScaleForPixelHeight(&font_info, font_size);
 
-	stbtt_BakeFontBitmap(font->data, 0, font->size, surface->pixels, surface->w, surface->h,
-		ascii_begin, ascii_size, font->baked_chars
-	);
+	int ascent;
+	int descent;
+	int line_gap;
+	stbtt_GetFontVMetrics(&font_info, &ascent, &descent, &line_gap);
 
-	for (auto i = 0; i < ascii_size; i++) // TODO: For vertical alignment, but is it needed?
+	for (auto i = 0; i < ascii_size; i++)
 	{
-		if (font->baked_chars[i].yoff > font->baseline)
+		const int codepoint = ascii_begin + i;
+		shiny_glyph_info_t *glyph = font->glyphs + i;
+
+		const int index = stbtt_FindGlyphIndex(&font_info, codepoint);
+		if (index <= 0)
 		{
-			font->baseline = font->baked_chars[i].yoff;
+			return SDL_SetError("Invalid codepoint: %d", codepoint);
 		}
+
+		glyphs[i].value = codepoint;
+
+		stbtt_GetCodepointHMetrics(&font_info, codepoint, &glyphs[i].advance_x, nullptr);
+		glyphs[i].advance_x = (int) ((float) glyph->advance_x * scale);
+		glyphs[i].offset_y += (int) ((float) ascent * scale);
+
+		int glyph_width;
+		int glyph_height;
+
+		if (codepoint == ' ')
+		{
+			glyph_width = glyph->advance_x;
+			glyph_height = font_size;
+		}
+		else
+		{
+			int box_x0;
+			int box_y0;
+			int box_x1;
+			int box_y1;
+			stbtt_GetCodepointBitmapBox(&font_info, codepoint, scale, scale,
+				&box_x0, &box_y0, &box_x1, &box_y1
+			);
+
+			glyph_width = box_x1 - box_x0;
+			glyph_height = box_y1 - box_y0;
+		}
+
+		glyph->image = SDL_CreateSurface(glyph_width, glyph_height, SDL_PIXELFORMAT_INDEX8);
+		if (glyphs[i].image == nullptr || !shiny_build_palette(glyph->image, font->color))
+		{
+			return false;
+		}
+
+		stbtt_MakeCodepointBitmap(&font_info, glyph->image->pixels, glyph_width, glyph_height,
+			glyph_width, scale, scale, codepoint
+		);
+
+		char *filename;
+		SDL_asprintf(&filename, "/tmp/atlas/%d.png", codepoint);
+		stbi_write_png(filename, glyph_width, glyph_height, 1, glyph->image->pixels, glyph_width);
+		SDL_free(filename);
 	}
 
-	font->glyphs = SDL_CreateTextureFromSurface(font->renderer, surface);
-	if (font->glyphs == nullptr)
+	auto total_width = 0;
+	auto max_glyph_width = 0;
+
+	for (auto i = 0; i < ascii_size; i++)
 	{
-		SDL_DestroySurface(surface);
+		max_glyph_width = SDL_max(max_glyph_width, glyphs[i].image->w);
+		total_width += glyphs[i].image->w + (2 * glyph_padding);
+	}
+
+	constexpr int padded_font_size = font_size + (2 * glyph_padding);
+	const float total_area = (float) total_width * (float) padded_font_size * 1.2F;
+	const float image_min_size = SDL_sqrtf(total_area);
+	const auto image_size = (int) SDL_powf(2, SDL_ceilf(SDL_logf(image_min_size) / SDL_logf(2)));
+
+	const int atlas_width = image_size;
+	const int atlas_height = (int) total_area < ((image_size * image_size) / 2) ? image_size / 2 : image_size;
+	SDL_Surface *atlas = SDL_CreateSurface(atlas_width, atlas_height, SDL_PIXELFORMAT_INDEX8);
+
+	if (atlas == nullptr || !shiny_build_palette(atlas, font->color))
+	{
 		return false;
 	}
 
-	SDL_DestroySurface(surface);
+	stbrp_context context;
+	stbrp_node nodes[ascii_size];
 
-	if (!SDL_SetTextureBlendMode(font->glyphs, SDL_BLENDMODE_BLEND))
+	stbrp_init_target(&context, atlas->w, atlas->h, nodes, ascii_size);
+	stbrp_rect rects[ascii_size];
+
+	for (auto i = 0; i < ascii_size; i++)
+	{
+		rects[i].id = i;
+		rects[i].w = glyphs[i].image->w + (2 * glyph_padding);
+		rects[i].h = glyphs[i].image->h + (2 * glyph_padding);
+	}
+
+	if (!stbrp_pack_rects(&context, rects, ascii_size))
+	{
+		return SDL_SetError("Font packing failed");
+	}
+
+	for (auto i = 0; i < ascii_size; i++)
+	{
+		if (!rects[i].was_packed)
+		{
+			SDL_LogWarn(SHINY_LOG_CATEGORY_FONT, "Invalid character for packaging: '%c'", glyphs[i].value);
+			continue;
+		}
+
+		const shiny_glyph_info_t *glyph = glyphs + i;;
+
+		font->recs[i].x = rects[i].x + glyph_padding;
+		font->recs[i].y = rects[i].y + glyph_padding;
+		font->recs[i].w = glyph->image->w;
+		font->recs[i].h = glyph->image->h;
+
+		if (!SDL_BlitSurface(glyph->image, nullptr, atlas, &font->recs[i]))
+		{
+			return false;
+		}
+
+		// TODO: Remove
+		for (auto y = 0; y < glyphs[i].image->h; y++)
+		{
+			for (auto x = 0; x < glyphs[i].image->w; x++)
+			{
+				((unsigned char *) atlas->pixels)[((rects[i].y + glyph_padding + y) * atlas->w) + (rects[i].x +
+					glyph_padding + x)] = ((unsigned char *) glyphs[i].image->pixels)[(y * glyphs[i].image->w) + x];
+			}
+		}
+
+		SDL_DestroySurface(glyph->image);
+	}
+
+	stbi_write_png("/tmp/atlas.png", atlas->w, atlas->h, 1, atlas->pixels, atlas->w);
+
+	font->texture = SDL_CreateTextureFromSurface(font->renderer, atlas);
+	SDL_DestroySurface(atlas);
+	if (font->texture == nullptr)
+	{
+		return false;
+	}
+
+	if (!SDL_SetTextureBlendMode(font->texture, SDL_BLENDMODE_BLEND)
+		|| !SDL_SetTextureScaleMode(font->texture, SDL_SCALEMODE_LINEAR))
 	{
 		return false;
 	}
@@ -140,7 +258,7 @@ bool shiny_font_bake(shiny_font_t *font)
 	return true;
 }
 
-shiny_font_t *shiny_font_create(SDL_Renderer *renderer, const Uint8 *data, const float font_size)
+shiny_font_t *shiny_font_create(SDL_Renderer *renderer, const Uint8 *data)
 {
 	shiny_font_t *font = SDL_calloc(1, sizeof(shiny_font_t));
 	if (font == nullptr)
@@ -150,10 +268,9 @@ shiny_font_t *shiny_font_create(SDL_Renderer *renderer, const Uint8 *data, const
 
 	font->renderer = renderer;
 	font->data = data;
-	font->size = font_size;
 	font->color = shiny_sdl_theme_color(SHINY_COLOR_FOREGROUND);
 
-	if (!shiny_font_parse(font) || !shiny_font_bake(font))
+	if (!shiny_font_bake(font))
 	{
 		SDL_free(font);
 		return nullptr;
@@ -163,78 +280,47 @@ shiny_font_t *shiny_font_create(SDL_Renderer *renderer, const Uint8 *data, const
 }
 
 bool shiny_font_draw_text(const shiny_font_t *font, const float x,
-	const float y, const char *text, const Sint32 length)
+	const float y, const float text_size, const char *text, const Sint32 length)
 {
-	float curr_x = x;
+	auto offset_x = 0.F;
+	auto offset_y = 0.F;
+	const float scale = text_size / (float) font_size;
 
 	for (auto i = 0; i < length; i++)
 	{
 		const auto codepoint = (int) text[i];
-		int advance_width;
-		int left_side_bearing;
-		stbtt_GetCodepointHMetrics(&font->info, codepoint, &advance_width, &left_side_bearing);
+		const int index = codepoint - ascii_begin;
+		const SDL_Rect *rect = &font->recs[index];
 
-		int bm_x0;
-		int bm_y0;
-		int bm_x1;
-		int bm_y1;
-		stbtt_GetCodepointBitmapBox(&font->info, codepoint, font->scale, font->scale,
-			&bm_x0, &bm_y0, &bm_x1, &bm_y1);
-
-		const float curr_y = y + ((float) font->ascent * font->scale) + (float) bm_y0;
-
-		// TODO: This is probably the definition of terrible
-		SDL_Surface *surface = SDL_CreateSurface(advance_width, (int) font->size, SDL_PIXELFORMAT_INDEX8);
-		if (surface == nullptr)
+		if (codepoint == '\n')
 		{
-			return false;
+			constexpr auto line_spacing = 2.F;
+
+			offset_x = 0.F;
+			offset_y += font_size + line_spacing;
+			continue;
 		}
 
-		if (!shiny_build_palette(surface, font->color))
-		{
-			return false;
-		}
-
-		stbtt_MakeCodepointBitmap(&font->info, surface->pixels, surface->w, surface->h,
-			surface->w, font->scale, font->scale, codepoint);
-
-		// TODO: This is also REALLY bad
-		SDL_Texture *texture = SDL_CreateTextureFromSurface(font->renderer, surface);
-		if (texture == nullptr)
-		{
-			SDL_DestroySurface(surface);
-			return false;
-		}
-
-		if (!SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND))
-		{
-			return false;
-		}
-
-		if (!SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST))
-		{
-			return false;
-		}
-
-		const SDL_FRect dst = {
-			.x = curr_x,
-			.y = curr_y,
-			.w = (float) texture->w,
-			.h = (float) texture->h,
+		SDL_FRect src = {
+			.x = (float) rect->x - (float) glyph_padding,
+			.y = (float) rect->y - (float) glyph_padding,
+			.w = ((float) font->recs[index].w + ((float) glyph_padding * 2.F)),
+			.h = ((float) font->recs[index].h + ((float) glyph_padding * 2.F)),
 		};
-		SDL_RenderTexture(font->renderer, texture, nullptr, &dst);
+		SDL_FRect dst = {
+			.x = x + offset_x + ((float) font->glyphs[index].offset_x * scale) - ((float) glyph_padding * scale),
+			.y = y + offset_y + ((float) font->glyphs[index].offset_y * scale) - ((float) glyph_padding * scale),
+			.w = ((float) font->recs[index].w + ((float) glyph_padding * 2.F)) * scale,
+			.h = ((float) font->recs[index].h + ((float) glyph_padding * 2.F)) * scale,
+		};
 
-		SDL_DestroyTexture(texture);
-		SDL_DestroySurface(surface);
+		SDL_RenderTexture(font->renderer, font->texture, &src, &dst);
 
-		curr_x += (float) advance_width * font->scale;
+		const int width = font->glyphs[index].advance_x == 0
+			? font->recs[index].w
+			: font->glyphs[index].advance_x;
 
-		if (i < length - 1)
-		{
-			const auto next_codepoint = (int) text[i + 1];
-			const int kern = stbtt_GetCodepointKernAdvance(&font->info, codepoint, next_codepoint);
-			curr_x += (float) kern * font->scale;
-		}
+		offset_x += (float) width * scale;
 	}
 
 	return true;
@@ -242,6 +328,6 @@ bool shiny_font_draw_text(const shiny_font_t *font, const float x,
 
 void shiny_font_destroy(shiny_font_t *font)
 {
-	SDL_DestroyTexture(font->glyphs);
+	SDL_DestroyTexture(font->texture);
 	SDL_free(font);
 }
