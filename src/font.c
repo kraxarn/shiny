@@ -19,7 +19,7 @@
 
 // ASCII printable characters
 static constexpr auto ascii_begin = 32;
-static constexpr auto ascii_size = 96;
+static constexpr auto ascii_size = 95;
 
 typedef struct shiny_font_t
 {
