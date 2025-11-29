@@ -223,10 +223,11 @@ bool shiny_font_bake(shiny_font_t *font)
 		font->recs[i].w = glyph->image->w;
 		font->recs[i].h = glyph->image->h;
 
-		if (!SDL_BlitSurface(glyph->image, nullptr, atlas, &font->recs[i]))
-		{
-			return false;
-		}
+		// TODO: This corrupts some characters for some reason
+		// if (!SDL_BlitSurface(glyph->image, nullptr, atlas, &font->recs[i]))
+		// {
+		// 	return false;
+		// }
 
 		// TODO: Remove
 		for (auto y = 0; y < glyphs[i].image->h; y++)
