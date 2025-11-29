@@ -101,7 +101,7 @@ bool shiny_font_bake(shiny_font_t *font)
 		return false;
 	}
 
-	const float scale = stbtt_ScaleForPixelHeight(&font_info, font_size);
+	const float scale = stbtt_ScaleForPixelHeight(&font_info, (float) font_size);
 
 	int ascent;
 	int descent;
@@ -121,9 +121,13 @@ bool shiny_font_bake(shiny_font_t *font)
 
 		glyphs[i].value = codepoint;
 
-		stbtt_GetCodepointHMetrics(&font_info, codepoint, &glyphs[i].advance_x, nullptr);
-		glyphs[i].advance_x = (int) ((float) glyph->advance_x * scale);
-		glyphs[i].offset_y += (int) ((float) ascent * scale);
+		stbtt_GetGlyphBitmapBox(&font_info, index, scale, scale,
+			&glyph->offset_x, &glyph->offset_y, nullptr, nullptr
+		);
+
+		stbtt_GetCodepointHMetrics(&font_info, codepoint, &glyph->advance_x, nullptr);
+		glyph->advance_x = (int) ((float) glyph->advance_x * scale);
+		glyph->offset_y += (int) ((float) ascent * scale);
 
 		int glyph_width;
 		int glyph_height;
