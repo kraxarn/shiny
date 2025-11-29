@@ -84,7 +84,7 @@ void shiny_default_theme()
 	shiny_theme_set_color(SHINY_COLOR_BORDER, color6);
 
 	shiny_theme_set_gap(SHINY_GAP_DEFAULT, 5);
-	shiny_theme_set_gap(SHINY_GAP_MENUBAR, 25);
+	shiny_theme_set_gap(SHINY_GAP_MENUBAR, 15);
 	shiny_theme_set_gap(SHINY_GAP_WINDOW_ITEM, 15);
 
 	shiny_theme_set_corner_radius(SHINY_CORNER_RADIUS_DEFAULT, 4);
@@ -99,7 +99,7 @@ void shiny_default_theme()
 	shiny_theme_set_padding(SHINY_PADDING_CONTROL, 6);
 	shiny_theme_set_padding(SHINY_PADDING_COMBOBOX, 8);
 
-	shiny_theme_set_size(SHINY_WIDTH_COMBOBOX, 175);
+	shiny_theme_set_size(SHINY_WIDTH_COMBOBOX, 230);
 	shiny_theme_set_size(SHINY_HEIGHT_COMBOBOX, 21
 		+ (shiny_theme_padding(SHINY_PADDING_CONTROL) * 2));
 }
