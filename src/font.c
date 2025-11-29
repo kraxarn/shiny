@@ -294,7 +294,9 @@ bool shiny_font_draw_text(const shiny_font_t *font, const float x,
 	{
 		const auto codepoint = (int) text[i];
 		const int index = codepoint - ascii_begin;
-		const SDL_Rect *rect = &font->recs[index];
+
+		const SDL_Rect *rect = font->recs + index;
+		const shiny_glyph_info_t *glyph = font->glyphs + index;
 
 		if (codepoint == '\n')
 		{
@@ -308,22 +310,19 @@ bool shiny_font_draw_text(const shiny_font_t *font, const float x,
 		SDL_FRect src = {
 			.x = (float) rect->x - (float) glyph_padding,
 			.y = (float) rect->y - (float) glyph_padding,
-			.w = ((float) font->recs[index].w + ((float) glyph_padding * 2.F)),
-			.h = ((float) font->recs[index].h + ((float) glyph_padding * 2.F)),
+			.w = ((float) rect->w + ((float) glyph_padding * 2.F)),
+			.h = ((float) rect->h + ((float) glyph_padding * 2.F)),
 		};
 		SDL_FRect dst = {
-			.x = x + offset_x + ((float) font->glyphs[index].offset_x * scale) - ((float) glyph_padding * scale),
-			.y = y + offset_y + ((float) font->glyphs[index].offset_y * scale) - ((float) glyph_padding * scale),
-			.w = ((float) font->recs[index].w + ((float) glyph_padding * 2.F)) * scale,
-			.h = ((float) font->recs[index].h + ((float) glyph_padding * 2.F)) * scale,
+			.x = x + offset_x + ((float) glyph->offset_x * scale) - ((float) glyph_padding * scale),
+			.y = y + offset_y + ((float) glyph->offset_y * scale) - ((float) glyph_padding * scale),
+			.w = ((float) rect->w + ((float) glyph_padding * 2.F)) * scale,
+			.h = ((float) rect->h + ((float) glyph_padding * 2.F)) * scale,
 		};
 
 		SDL_RenderTexture(font->renderer, font->texture, &src, &dst);
 
-		const int width = font->glyphs[index].advance_x == 0
-			? font->recs[index].w
-			: font->glyphs[index].advance_x;
-
+		const int width = glyph->advance_x == 0 ? rect->w : glyph->advance_x;
 		offset_x += (float) width * scale;
 	}
 
