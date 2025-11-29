@@ -36,10 +36,6 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 
-// TODO: Debug only?
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
-
 // ASCII printable characters
 static constexpr auto ascii_begin = 32;
 static constexpr auto ascii_size = 95;
@@ -160,11 +156,6 @@ bool shiny_font_bake(shiny_font_t *font)
 		stbtt_MakeCodepointBitmap(&font_info, glyph->image->pixels, glyph_width, glyph_height,
 			glyph_width, scale, scale, codepoint
 		);
-
-		char *filename;
-		SDL_asprintf(&filename, "/tmp/atlas/%d.png", codepoint);
-		stbi_write_png(filename, glyph_width, glyph_height, 1, glyph->image->pixels, glyph_width);
-		SDL_free(filename);
 	}
 
 	auto total_width = 0;
@@ -241,8 +232,6 @@ bool shiny_font_bake(shiny_font_t *font)
 
 		SDL_DestroySurface(glyph->image);
 	}
-
-	stbi_write_png("/tmp/atlas.png", atlas->w, atlas->h, 1, atlas->pixels, atlas->w);
 
 	font->texture = SDL_CreateTextureFromSurface(font->renderer, atlas);
 	SDL_DestroySurface(atlas);
