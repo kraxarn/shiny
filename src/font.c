@@ -304,8 +304,8 @@ bool shiny_font_draw_text(const shiny_font_t *font, const float x,
 			.h = ((float) rect->h + ((float) glyph_padding * 2.F)),
 		};
 		SDL_FRect dst = {
-			.x = x + offset_x + ((float) glyph->offset_x * scale) - ((float) glyph_padding * scale),
-			.y = y + offset_y + ((float) glyph->offset_y * scale) - ((float) glyph_padding * scale),
+			.x = x + offset_x + ((float) glyph->offset_x * scale),
+			.y = y + offset_y + ((float) glyph->offset_y * scale),
 			.w = ((float) rect->w + ((float) glyph_padding * 2.F)) * scale,
 			.h = ((float) rect->h + ((float) glyph_padding * 2.F)) * scale,
 		};
