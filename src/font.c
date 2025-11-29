@@ -324,3 +324,34 @@ void shiny_font_destroy(shiny_font_t *font)
 	SDL_DestroyTexture(font->texture);
 	SDL_free(font);
 }
+
+void shiny_font_measure_text(const shiny_font_t *font, const char *text,
+	const int text_length, const float text_size, float *width, float *height)
+{
+	float line_width = 0;
+	auto max_width = 0.F;
+
+	const float scale = text_size / (float) font_size;
+
+	for (auto i = 0; i < text_length; i++)
+	{
+		if (text[i] == '\n')
+		{
+			max_width = SDL_max(max_width, line_width);
+			line_width = 0;
+			continue;
+		}
+
+		const int index = text[i] - 32;
+		const SDL_Rect *rect = font->recs + index;
+		const shiny_glyph_info_t *glyph = font->glyphs + index;
+
+		line_width += glyph->advance_x != 0
+			? (float) glyph->advance_x
+			: (float) (rect->w + glyph->offset_x);
+	}
+
+	max_width = SDL_max(max_width, line_width);
+	*width = max_width * scale;
+	*height = text_size;
+}
