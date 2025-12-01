@@ -4,8 +4,10 @@
 
 #include <SDL3/SDL_stdinc.h>
 
-void shiny_element_open(const char *element_id)
+void shiny_element_open(Clay_Context *context, const char *element_id)
 {
+	Clay_SetCurrentContext(context);
+
 	const Clay_String str = {
 		.isStaticallyAllocated = true,
 		.length = SDL_strlen(element_id),
