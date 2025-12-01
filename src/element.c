@@ -8,6 +8,12 @@ void shiny_element_open(Clay_Context *context, const char *element_id)
 {
 	Clay_SetCurrentContext(context);
 
+	if (element_id == nullptr)
+	{
+		Clay__OpenElement();
+		return;
+	}
+
 	const Clay_String str = {
 		.isStaticallyAllocated = true,
 		.length = SDL_strlen(element_id),
