@@ -276,6 +276,11 @@ shiny_font_t *shiny_font_create(SDL_Renderer *renderer, const Uint8 *data)
 bool shiny_font_draw_text(const shiny_font_t *font, const float x,
 	const float y, const float text_size, const char *text, const Sint32 length)
 {
+	if (font == nullptr)
+	{
+		return SDL_SetError("Invalid font");
+	}
+
 	auto offset_x = 0.F;
 	auto offset_y = 0.F;
 	const float scale = text_size / (float) font_size;
