@@ -10,6 +10,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/menubaritem.c
 	${CMAKE_CURRENT_SOURCE_DIR}/menucontent.c
 	${CMAKE_CURRENT_SOURCE_DIR}/menuitem.c
+	${CMAKE_CURRENT_SOURCE_DIR}/menuitems.c
 	${CMAKE_CURRENT_SOURCE_DIR}/spacer.c
 	${CMAKE_CURRENT_SOURCE_DIR}/theme.c
 )
