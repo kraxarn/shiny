@@ -9,7 +9,7 @@ typedef struct shiny_string_t
 	const char *value;
 } shiny_string_t;
 
-#define SHINY_STRING(str) shiny_static_string((str), sizeof((str)) / sizeof((str)[0]) - sizeof((str)[0]))
+#define SHINY_STRING(str) shiny_static_string((str), (sizeof((str)) / sizeof((str)[0])) - sizeof((str)[0]))
 
 shiny_string_t shiny_string(const char *str);
 
