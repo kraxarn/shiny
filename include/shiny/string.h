@@ -2,7 +2,12 @@
 
 #include <SDL3/SDL_stdinc.h>
 
-typedef struct shiny_string_t shiny_string_t;
+typedef struct shiny_string_t
+{
+	bool is_static;
+	Sint32 length;
+	const char *value;
+} shiny_string_t;
 
 #define SHINY_STRING(str) shiny_static_string((str), sizeof((str)) / sizeof((str)[0]) - sizeof((str)[0]))
 
