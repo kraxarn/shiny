@@ -4,6 +4,7 @@
 #include "shiny/internal/color.h"
 #include "shiny/internal/element.h"
 #include "shiny/internal/logcategory.h"
+#include "shiny/internal/menubaritem.h"
 
 #include "clay.h"
 
@@ -79,5 +80,11 @@ bool shiny_menu_item_end()
 	shiny_element_close(); // container
 
 	const Clay_PointerDataInteractionState state = SDL_GetNumberProperty(states, current_element_id, -1);
-	return state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME;
+	if (state != CLAY_POINTER_DATA_PRESSED_THIS_FRAME)
+	{
+		return false;
+	}
+
+	shiny_menubar_item_hide();
+	return true;
 }
