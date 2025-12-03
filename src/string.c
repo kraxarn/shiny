@@ -13,9 +13,19 @@ shiny_string_t shiny_string(const char *str)
 {
 	shiny_string_t string;
 	string.value = (Clay_String){
-		// This doesn't necessarily have to be true
 		.isStaticallyAllocated = false,
 		.length = SDL_strlen(str),
+		.chars = str,
+	};
+	return string;
+}
+
+shiny_string_t shiny_static_string(const char *str, const Sint32 length)
+{
+	shiny_string_t string;
+	string.value = (Clay_String){
+		.isStaticallyAllocated = true,
+		.length = length,
 		.chars = str,
 	};
 	return string;
