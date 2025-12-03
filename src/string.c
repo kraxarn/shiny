@@ -1,4 +1,5 @@
 #include "shiny/string.h"
+#include "shiny/internal/string.h"
 
 #include <SDL3/SDL_stdinc.h>
 
@@ -18,4 +19,13 @@ shiny_string_t shiny_static_string(const char *str, const Sint32 length)
 	string.length = length;
 	string.value = str;
 	return string;
+}
+
+Clay_String shiny_clay_string(const shiny_string_t string)
+{
+	return (Clay_String){
+		.isStaticallyAllocated = string.is_static,
+		.length = string.length,
+		.chars = string.value,
+	};
 }
