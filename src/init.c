@@ -1,5 +1,8 @@
 #include "shiny/init.h"
 #include "shiny/font.h"
+#include "shiny/themekey.h"
+#include "shiny/internal/color.h"
+#include "shiny/internal/element.h"
 #include "shiny/internal/logcategory.h"
 
 #include "clay.h"
@@ -25,6 +28,7 @@ typedef struct shiny_state_t
 	Clay_Arena arena;
 	Clay_Context *context;
 	SDL_Rect safe_area;
+	SDL_Rect output_size;
 } shiny_state_t;
 
 static Clay_Dimensions measure_text(const Clay_StringSlice text, Clay_TextElementConfig *config, void *user_data)
@@ -63,9 +67,7 @@ shiny_state_t *shiny_state_create(SDL_Renderer *renderer)
 		return nullptr;
 	}
 
-	int render_width;
-	int render_height;
-	if (!SDL_GetRenderOutputSize(renderer, &render_width, &render_height))
+	if (!SDL_GetRenderOutputSize(renderer, &state->output_size.w, &state->output_size.h))
 	{
 		SDL_free(state);
 		return nullptr;
@@ -75,8 +77,8 @@ shiny_state_t *shiny_state_create(SDL_Renderer *renderer)
 	state->arena = Clay_CreateArenaWithCapacityAndMemory(mem_size, SDL_malloc(mem_size));
 
 	const Clay_Dimensions dimensions = {
-		.width = (float) render_width,
-		.height = (float) render_height,
+		.width = (float) state->output_size.w,
+		.height = (float) state->output_size.h,
 	};
 	const Clay_ErrorHandler error_handler = {
 		.errorHandlerFunction = handle_clay_error,
@@ -158,6 +160,8 @@ void shiny_state_event(shiny_state_t *state, const float delta_time, const SDL_E
 			.height = (float) event->window.data2,
 		};
 		Clay_SetLayoutDimensions(dimensions);
+		state->output_size.w = event->window.data1;
+		state->output_size.h = event->window.data2;
 		return;
 	}
 
@@ -206,10 +210,32 @@ void shiny_state_render_begin(const shiny_state_t *state)
 {
 	Clay_SetCurrentContext(state->context);
 	Clay_BeginLayout();
+
+	shiny_element_open(state->context, "RootContainer");
+
+	const Clay_ElementDeclaration element = {
+		.layout = (Clay_LayoutConfig){
+			.layoutDirection = CLAY_TOP_TO_BOTTOM,
+			.sizing = (Clay_Sizing){
+				.width = CLAY_SIZING_GROW(0),
+				.height = CLAY_SIZING_GROW(0),
+			},
+			.padding = (Clay_Padding){
+				.left = state->safe_area.x,
+				.right = state->output_size.w - state->safe_area.w - state->safe_area.x,
+				.top = state->safe_area.y,
+				.bottom = state->output_size.h - state->safe_area.h - state->safe_area.y,
+			},
+		},
+		.backgroundColor = shiny_clay_theme_color(SHINY_COLOR_CLEAR),
+	};
+	shiny_element_configure(&element);
 }
 
 void shiny_state_render_end(const shiny_state_t *state)
 {
+	shiny_element_close();
+
 	Clay_RenderCommandArray commands = Clay_EndLayout();
 
 	// TODO: This is probably not a good way to override font rendering
