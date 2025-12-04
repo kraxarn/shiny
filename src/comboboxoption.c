@@ -68,6 +68,7 @@ bool shiny_combobox_option(Clay_Context *context, const char *element_id,
 		return false;
 	}
 
+	SDL_ClearProperty(states, element_id);
 	shiny_combobox_hide();
 	return true;
 }
