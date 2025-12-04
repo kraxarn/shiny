@@ -19,7 +19,7 @@ bool shiny_state_add_font(shiny_state_t *state, shiny_font_t *font);
 
 shiny_font_t *shiny_state_font(const shiny_state_t *state, Uint16 font_id);
 
-void shiny_state_event(const shiny_state_t *state, float delta_time, const SDL_Event *event);
+void shiny_state_event(shiny_state_t *state, float delta_time, const SDL_Event *event);
 
 void shiny_state_render_begin(const shiny_state_t *state);
 

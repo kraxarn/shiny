@@ -9,8 +9,10 @@
 #include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_mouse.h>
+#include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_video.h>
 
 #define SDL3_CLAY_NO_SDL_TTF
 #include "renderers/SDL3/clay_renderer_SDL3.h"
@@ -22,6 +24,7 @@ typedef struct shiny_state_t
 	Uint8 fonts_size;
 	Clay_Arena arena;
 	Clay_Context *context;
+	SDL_Rect safe_area;
 } shiny_state_t;
 
 static Clay_Dimensions measure_text(const Clay_StringSlice text, Clay_TextElementConfig *config, void *user_data)
@@ -52,6 +55,13 @@ shiny_state_t *shiny_state_create(SDL_Renderer *renderer)
 	state->renderer = renderer;
 	state->fonts = nullptr;
 	state->fonts_size = 0;
+
+	SDL_Window *window = SDL_GetRenderWindow(renderer);
+	if (window == nullptr || !SDL_GetWindowSafeArea(window, &state->safe_area))
+	{
+		SDL_free(state);
+		return nullptr;
+	}
 
 	int render_width;
 	int render_height;
@@ -137,7 +147,7 @@ shiny_font_t *shiny_state_font(const shiny_state_t *state, const Uint16 font_id)
 	return state->fonts[font_id];
 }
 
-void shiny_state_event(const shiny_state_t *state, const float delta_time, const SDL_Event *event)
+void shiny_state_event(shiny_state_t *state, const float delta_time, const SDL_Event *event)
 {
 	Clay_SetCurrentContext(state->context);
 
@@ -148,6 +158,16 @@ void shiny_state_event(const shiny_state_t *state, const float delta_time, const
 			.height = (float) event->window.data2,
 		};
 		Clay_SetLayoutDimensions(dimensions);
+		return;
+	}
+
+	if (event->type == SDL_EVENT_WINDOW_SAFE_AREA_CHANGED)
+	{
+		SDL_Window *window = SDL_GetRenderWindow(state->renderer);
+		if (window == nullptr || !SDL_GetWindowSafeArea(window, &state->safe_area))
+		{
+			SDL_LogError(SHINY_LOG_CATEGORY_CORE, "Safe area failed: %s", SDL_GetError());
+		}
 		return;
 	}
 
