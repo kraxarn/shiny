@@ -1,4 +1,5 @@
 #include "shiny/combobox.h"
+#include "shiny/internal/combobox.h"
 #include "shiny/spacer.h"
 #include "shiny/theme.h"
 #include "shiny/themekey.h"
@@ -11,6 +12,11 @@
 
 static Uint32 current = 0;
 static bool is_open;
+
+void shiny_combobox_hide()
+{
+	current = 0;
+}
 
 static void on_hover(const Clay_ElementId element_id, const Clay_PointerData pointer_data,
 	[[maybe_unused]] intptr_t user_data)
