@@ -11,3 +11,5 @@ void shiny_text_element_open(Clay_Context *context, const char *text, Uint16 fon
 void shiny_element_configure(const Clay_ElementDeclaration *declaration);
 
 void shiny_element_close();
+
+Uint32 shiny_element_hash_id(const char *element_id);

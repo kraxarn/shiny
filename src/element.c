@@ -51,3 +51,13 @@ void shiny_element_close()
 {
 	Clay__CloseElement();
 }
+
+Uint32 shiny_element_hash_id(const char *element_id)
+{
+	const Clay_String key = {
+		.isStaticallyAllocated = false,
+		.length = SDL_strlen(element_id),
+		.chars = element_id,
+	};
+	return Clay__HashString(key, 0).id;
+}
