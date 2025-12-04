@@ -9,8 +9,8 @@
 
 #include <SDL3/SDL_stdinc.h>
 
-static Uint32 current_open_element_id = 0;
-static Uint32 current_element_id;
+static Uint32 current = 0;
+static bool is_open;
 
 static void on_hover(const Clay_ElementId element_id, const Clay_PointerData pointer_data,
 	[[maybe_unused]] intptr_t user_data)
@@ -20,13 +20,13 @@ static void on_hover(const Clay_ElementId element_id, const Clay_PointerData poi
 		return;
 	}
 
-	if (current_open_element_id == 0 || current_open_element_id != element_id.id)
+	if (current == 0 || current != element_id.id)
 	{
-		current_open_element_id = element_id.id;
+		current = element_id.id;
 	}
 	else
 	{
-		current_open_element_id = 0;
+		current = 0;
 	}
 }
 
@@ -34,8 +34,7 @@ bool shiny_combobox_begin(Clay_Context *context, const char *element_id,
 	const char *value, const Uint16 font_size, const int item_count)
 {
 	shiny_element_open(context, element_id);
-	current_element_id = shiny_element_hash_id(element_id);
-	const bool is_open = current_element_id == current_open_element_id;
+	is_open = shiny_element_hash_id(element_id) == current;
 
 	const Clay_ElementDeclaration container = {
 		.layout = (Clay_LayoutConfig){
@@ -94,7 +93,7 @@ bool shiny_combobox_begin(Clay_Context *context, const char *element_id,
 
 void shiny_combobox_end()
 {
-	if (current_open_element_id == current_element_id)
+	if (is_open)
 	{
 		shiny_element_close(); // options
 	}
