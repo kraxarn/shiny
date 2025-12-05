@@ -42,7 +42,7 @@ static void on_window_title_hover(const Clay_ElementId element_id, const Clay_Po
 		if (offset == nullptr)
 		{
 			offset = SDL_malloc(sizeof(SDL_FPoint));
-			SDL_SetPointerPropertyWithCleanup(positions, prop_name, offset, cleanup, nullptr);
+			SDL_SetPointerPropertyWithCleanup(offsets, prop_name, offset, cleanup, nullptr);
 
 			const auto data = Clay_GetElementData(element_id);
 			offset->x = pointer_data.position.x - data.boundingBox.x;
