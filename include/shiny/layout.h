@@ -2,7 +2,7 @@
 
 #include <SDL3/SDL_stdinc.h>
 
-typedef enum shiny_layout_flag_t: Uint16
+typedef enum [[clang::flag_enum]] shiny_layout_flag_t: Uint16
 {
 	SHINY_LAYOUT_NONE = 0,
 
