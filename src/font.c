@@ -83,7 +83,7 @@ static bool shiny_build_palette(SDL_Surface *surface, const SDL_Color color)
 	return SDL_SetPaletteColors(palette, colors, 0, color_count);
 }
 
-bool shiny_font_bake(shiny_font_t *font)
+static bool font_bake(shiny_font_t *font)
 {
 	const Uint64 start = SDL_GetTicks();
 
@@ -263,7 +263,7 @@ shiny_font_t *shiny_font_create(SDL_Renderer *renderer, const Uint8 *data)
 	font->data = data;
 	font->color = shiny_theme_color(SHINY_COLOR_FOREGROUND);
 
-	if (!shiny_font_bake(font))
+	if (!font_bake(font))
 	{
 		SDL_free(font);
 		return nullptr;
