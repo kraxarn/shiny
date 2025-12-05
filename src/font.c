@@ -48,7 +48,6 @@ typedef struct shiny_glyph_info_t
 	int offset_x;
 	int offset_y;
 	int advance_x;
-	SDL_Surface *image; // TODO: Move to temporary variable
 } shiny_glyph_info_t;
 
 typedef struct shiny_font_t
@@ -103,6 +102,8 @@ bool shiny_font_bake(shiny_font_t *font)
 	int line_gap;
 	stbtt_GetFontVMetrics(&font_info, &ascent, &descent, &line_gap);
 
+	SDL_Surface *surfaces[ascii_size];
+
 	for (auto i = 0; i < ascii_size; i++)
 	{
 		const int codepoint = ascii_begin + i;
@@ -144,13 +145,13 @@ bool shiny_font_bake(shiny_font_t *font)
 			glyph_height = box_y1 - box_y0;
 		}
 
-		glyph->image = SDL_CreateSurface(glyph_width, glyph_height, SDL_PIXELFORMAT_INDEX8);
-		if (glyphs[i].image == nullptr || !shiny_build_palette(glyph->image, font->color))
+		surfaces[i] = SDL_CreateSurface(glyph_width, glyph_height, SDL_PIXELFORMAT_INDEX8);
+		if (surfaces[i] == nullptr || !shiny_build_palette(surfaces[i], font->color))
 		{
 			return false;
 		}
 
-		stbtt_MakeCodepointBitmap(&font_info, glyph->image->pixels, glyph_width, glyph_height,
+		stbtt_MakeCodepointBitmap(&font_info, surfaces[i]->pixels, glyph_width, glyph_height,
 			glyph_width, scale, scale, codepoint
 		);
 	}
@@ -160,8 +161,8 @@ bool shiny_font_bake(shiny_font_t *font)
 
 	for (auto i = 0; i < ascii_size; i++)
 	{
-		max_glyph_width = SDL_max(max_glyph_width, glyphs[i].image->w);
-		total_width += glyphs[i].image->w + (2 * glyph_padding);
+		max_glyph_width = SDL_max(max_glyph_width, surfaces[i]->w);
+		total_width += surfaces[i]->w + (2 * glyph_padding);
 	}
 
 	constexpr int padded_font_size = font_size + (2 * glyph_padding);
@@ -187,8 +188,8 @@ bool shiny_font_bake(shiny_font_t *font)
 	for (auto i = 0; i < ascii_size; i++)
 	{
 		rects[i].id = i;
-		rects[i].w = glyphs[i].image->w + (2 * glyph_padding);
-		rects[i].h = glyphs[i].image->h + (2 * glyph_padding);
+		rects[i].w = surfaces[i]->w + (2 * glyph_padding);
+		rects[i].h = surfaces[i]->h + (2 * glyph_padding);
 	}
 
 	if (!stbrp_pack_rects(&context, rects, ascii_size))
@@ -208,8 +209,8 @@ bool shiny_font_bake(shiny_font_t *font)
 
 		font->recs[i].x = rects[i].x + glyph_padding;
 		font->recs[i].y = rects[i].y + glyph_padding;
-		font->recs[i].w = glyph->image->w;
-		font->recs[i].h = glyph->image->h;
+		font->recs[i].w = surfaces[i]->w;
+		font->recs[i].h = surfaces[i]->h;
 
 		// TODO: This corrupts some characters for some reason
 		// if (!SDL_BlitSurface(glyph->image, nullptr, atlas, &font->recs[i]))
@@ -218,16 +219,16 @@ bool shiny_font_bake(shiny_font_t *font)
 		// }
 
 		// TODO: Remove
-		for (auto y = 0; y < glyphs[i].image->h; y++)
+		for (auto y = 0; y < surfaces[i]->h; y++)
 		{
-			for (auto x = 0; x < glyphs[i].image->w; x++)
+			for (auto x = 0; x < surfaces[i]->w; x++)
 			{
 				((unsigned char *) atlas->pixels)[((rects[i].y + glyph_padding + y) * atlas->w) + (rects[i].x +
-					glyph_padding + x)] = ((unsigned char *) glyphs[i].image->pixels)[(y * glyphs[i].image->w) + x];
+					glyph_padding + x)] = ((unsigned char *) surfaces[i]->pixels)[(y * surfaces[i]->w) + x];
 			}
 		}
 
-		SDL_DestroySurface(glyph->image);
+		SDL_DestroySurface(surfaces[i]);
 	}
 
 	font->texture = SDL_CreateTextureFromSurface(font->renderer, atlas);
