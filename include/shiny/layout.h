@@ -23,6 +23,9 @@ typedef enum shiny_layout_flag_t: Uint16
 	// Sizing
 	SHINY_SIZE_GROW_X = 1 << 8,
 	SHINY_SIZE_GROW_Y = 1 << 9,
+
+	// Padding
+	SHINY_PADDING_DEFAULT = 1 << 10,
 } shiny_layout_flag_t;
 
 void shiny_layout_begin(Clay_Context *context, const char *element_id, shiny_layout_flag_t flags);

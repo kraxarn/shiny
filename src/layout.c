@@ -1,4 +1,6 @@
 #include "shiny/layout.h"
+#include "shiny/theme.h"
+#include "shiny/themekey.h"
 #include "shiny/internal/element.h"
 
 #include "clay.h"
@@ -16,6 +18,9 @@ static constexpr shiny_layout_flag_t child_align_y =
 	SHINY_ALIGN_Y_TOP
 	| SHINY_ALIGN_Y_CENTER
 	| SHINY_ALIGN_Y_BOTTOM;
+
+static constexpr shiny_layout_flag_t padding =
+	SHINY_PADDING_DEFAULT;
 
 static int map_enum(const shiny_layout_flag_t flag)
 {
@@ -53,6 +58,26 @@ static int map_enum(const shiny_layout_flag_t flag)
 	}
 }
 
+static Clay__SizingType map_sizing_type(const shiny_layout_flag_t flag)
+{
+	return flag > 0 ? CLAY__SIZING_TYPE_GROW : CLAY__SIZING_TYPE_FIT;
+}
+
+static Clay_Padding map_padding(const shiny_layout_flag_t flag)
+{
+	if (flag == SHINY_PADDING_DEFAULT)
+	{
+		return (Clay_Padding){
+			.left = shiny_theme_gap(SHINY_GAP_DEFAULT),
+			.right = shiny_theme_gap(SHINY_GAP_DEFAULT),
+			.top = shiny_theme_gap(SHINY_GAP_DEFAULT),
+			.bottom = shiny_theme_gap(SHINY_GAP_DEFAULT),
+		};
+	}
+
+	return (Clay_Padding){};
+}
+
 void shiny_layout_begin(Clay_Context *context, const char *element_id, const shiny_layout_flag_t flags)
 {
 	shiny_element_open(context, element_id);
@@ -66,12 +91,13 @@ void shiny_layout_begin(Clay_Context *context, const char *element_id, const shi
 			},
 			.sizing = (Clay_Sizing){
 				.width = (Clay_SizingAxis){
-					.type = (flags & SHINY_SIZE_GROW_X) > 0 ? CLAY__SIZING_TYPE_GROW : CLAY__SIZING_TYPE_FIT,
+					.type = map_sizing_type(flags & SHINY_SIZE_GROW_X),
 				},
 				.height = (Clay_SizingAxis){
-					.type = (flags & SHINY_SIZE_GROW_Y) > 0 ? CLAY__SIZING_TYPE_GROW : CLAY__SIZING_TYPE_FIT,
+					.type = map_sizing_type(flags & SHINY_SIZE_GROW_Y),
 				},
 			},
+			.padding = map_padding(flags & padding),
 		},
 	};
 	shiny_element_configure(&element);
