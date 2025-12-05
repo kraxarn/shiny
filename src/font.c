@@ -48,6 +48,7 @@ typedef struct shiny_glyph_info_t
 	int offset_x;
 	int offset_y;
 	int advance_x;
+	SDL_Rect rect;
 } shiny_glyph_info_t;
 
 typedef struct shiny_font_t
@@ -57,7 +58,6 @@ typedef struct shiny_font_t
 	SDL_Color color;
 
 	SDL_Texture *texture;
-	SDL_Rect recs[ascii_size];
 	shiny_glyph_info_t glyphs[ascii_size];
 } shiny_font_t;
 
@@ -205,12 +205,13 @@ bool shiny_font_bake(shiny_font_t *font)
 			continue;
 		}
 
-		const shiny_glyph_info_t *glyph = glyphs + i;;
+		shiny_glyph_info_t *glyph = glyphs + i;
+		SDL_Rect *rect = &glyph->rect;
 
-		font->recs[i].x = rects[i].x + glyph_padding;
-		font->recs[i].y = rects[i].y + glyph_padding;
-		font->recs[i].w = surfaces[i]->w;
-		font->recs[i].h = surfaces[i]->h;
+		rect->x = rects[i].x + glyph_padding;
+		rect->y = rects[i].y + glyph_padding;
+		rect->w = surfaces[i]->w;
+		rect->h = surfaces[i]->h;
 
 		// TODO: This corrupts some characters for some reason
 		// if (!SDL_BlitSurface(glyph->image, nullptr, atlas, &font->recs[i]))
@@ -288,8 +289,8 @@ bool shiny_font_draw_text(const shiny_font_t *font, const float x,
 		const auto codepoint = (int) text[i];
 		const int index = codepoint - ascii_begin;
 
-		const SDL_Rect *rect = font->recs + index;
 		const shiny_glyph_info_t *glyph = font->glyphs + index;
+		const SDL_Rect *rect = &glyph->rect;
 
 		if (codepoint == '\n')
 		{
@@ -346,8 +347,8 @@ void shiny_font_measure_text(const shiny_font_t *font, const char *text,
 		}
 
 		const int index = text[i] - 32;
-		const SDL_Rect *rect = font->recs + index;
 		const shiny_glyph_info_t *glyph = font->glyphs + index;
+		const SDL_Rect *rect = &glyph->rect;
 
 		line_width += glyph->advance_x != 0
 			? (float) glyph->advance_x
