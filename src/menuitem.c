@@ -26,7 +26,7 @@ static void on_hover([[maybe_unused]] const Clay_ElementId element_id,
 	SDL_SetNumberProperty(states, element_id.stringId.chars, pointer_data.state);
 }
 
-void shiny_menu_item_begin(Clay_Context *context, const char *element_id)
+void shiny_menu_item_begin(const char *element_id)
 {
 	// We need an element ID for hashing
 	if (element_id == nullptr)
@@ -35,7 +35,7 @@ void shiny_menu_item_begin(Clay_Context *context, const char *element_id)
 		return;
 	}
 
-	shiny_element_open(context, element_id);
+	shiny_element_open(element_id);
 
 	const Clay_ElementDeclaration container = {
 		.layout = (Clay_LayoutConfig){
@@ -51,7 +51,7 @@ void shiny_menu_item_begin(Clay_Context *context, const char *element_id)
 		Clay_OnHover(on_hover, 0);
 	}
 
-	shiny_element_open(context, nullptr);
+	shiny_element_open(nullptr);
 
 	const Clay_ElementDeclaration content = {
 		.layout = (Clay_LayoutConfig){

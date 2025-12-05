@@ -23,9 +23,9 @@ void shiny_menubar_item_hide()
 	visible = false;
 }
 
-bool shiny_menubar_item_begin(Clay_Context *context, const char *element_id)
+bool shiny_menubar_item_begin(const char *element_id)
 {
-	shiny_element_open(context, element_id);
+	shiny_element_open(element_id);
 
 	Clay_OnHover(on_hover, 0);
 
@@ -47,9 +47,9 @@ void shiny_menubar_item_end()
 	shiny_element_close();
 }
 
-void shiny_menubar_content_begin(Clay_Context *context)
+void shiny_menubar_content_begin()
 {
-	shiny_element_open(context, nullptr);
+	shiny_element_open(nullptr);
 }
 
 void shiny_menubar_content_end()

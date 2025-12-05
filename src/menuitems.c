@@ -6,9 +6,9 @@
 
 #include "clay.h"
 
-void shiny_menu_items_begin(Clay_Context *context)
+void shiny_menu_items_begin()
 {
-	shiny_element_open(context, nullptr);
+	shiny_element_open(nullptr);
 
 	const Clay_ElementDeclaration element = {
 		.layout = (Clay_LayoutConfig){

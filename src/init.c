@@ -26,7 +26,6 @@ typedef struct shiny_state_t
 	shiny_font_t **fonts;
 	Uint8 fonts_size;
 	Clay_Arena arena;
-	Clay_Context *context;
 	SDL_Rect safe_area;
 	SDL_Rect output_size;
 } shiny_state_t;
@@ -83,9 +82,7 @@ shiny_state_t *shiny_state_create(SDL_Renderer *renderer)
 	const Clay_ErrorHandler error_handler = {
 		.errorHandlerFunction = handle_clay_error,
 	};
-	state->context = Clay_Initialize(state->arena, dimensions, error_handler);
-
-	Clay_SetCurrentContext(state->context);
+	Clay_Initialize(state->arena, dimensions, error_handler);
 	Clay_SetMeasureTextFunction(measure_text, (void *) state);
 
 	return state;
@@ -101,11 +98,6 @@ void shiny_state_destroy(shiny_state_t *state)
 	SDL_free((void *) state->arena.memory);
 	SDL_free((void *) state->fonts);
 	SDL_free((void *) state);
-}
-
-Clay_Context *shiny_state_clay_context(const shiny_state_t *state)
-{
-	return state->context;
 }
 
 bool shiny_state_add_font(shiny_state_t *state, shiny_font_t *font)
@@ -151,8 +143,6 @@ shiny_font_t *shiny_state_font(const shiny_state_t *state, const Uint16 font_id)
 
 void shiny_state_event(shiny_state_t *state, const float delta_time, const SDL_Event *event)
 {
-	Clay_SetCurrentContext(state->context);
-
 	if (event->type == SDL_EVENT_WINDOW_RESIZED)
 	{
 		const Clay_Dimensions dimensions = {
@@ -208,10 +198,9 @@ void shiny_state_event(shiny_state_t *state, const float delta_time, const SDL_E
 
 void shiny_state_render_begin(const shiny_state_t *state)
 {
-	Clay_SetCurrentContext(state->context);
 	Clay_BeginLayout();
 
-	shiny_element_open(state->context, "RootContainer");
+	shiny_element_open("RootContainer");
 
 	const Clay_ElementDeclaration element = {
 		.layout = (Clay_LayoutConfig){

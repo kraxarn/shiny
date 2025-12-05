@@ -4,9 +4,9 @@
 
 #include <SDL3/SDL_render.h>
 
-void shiny_image(Clay_Context *context, SDL_Texture *texture, const shiny_size_t *size)
+void shiny_image(SDL_Texture *texture, const shiny_size_t *size)
 {
-	shiny_element_open(context, nullptr);
+	shiny_element_open(nullptr);
 
 	const Clay_ElementDeclaration element = {
 		.layout = (Clay_LayoutConfig){

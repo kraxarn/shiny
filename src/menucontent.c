@@ -5,9 +5,9 @@
 
 #include "clay.h"
 
-void shiny_menu_content_begin(Clay_Context *context)
+void shiny_menu_content_begin()
 {
-	shiny_element_open(context, nullptr);
+	shiny_element_open(nullptr);
 
 	const Clay_ElementDeclaration element = {
 		.floating = (Clay_FloatingElementConfig){

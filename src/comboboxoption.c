@@ -21,10 +21,9 @@ static void on_hover(const Clay_ElementId element_id,
 	SDL_SetNumberProperty(states, element_id.stringId.chars, pointer_data.state);
 }
 
-bool shiny_combobox_option(Clay_Context *context, const char *element_id,
-	const char *value, const Uint16 font_size)
+bool shiny_combobox_option(const char *element_id, const char *value, const Uint16 font_size)
 {
-	shiny_element_open(context, nullptr);
+	shiny_element_open(nullptr);
 	{
 		const Clay_ElementDeclaration wrapper = {
 			.layout = (Clay_LayoutConfig){
@@ -37,7 +36,7 @@ bool shiny_combobox_option(Clay_Context *context, const char *element_id,
 		};
 		shiny_element_configure(&wrapper);
 
-		shiny_element_open(context, element_id);
+		shiny_element_open(element_id);
 		{
 			const Clay_ElementDeclaration content = {
 				.layout = (Clay_LayoutConfig){
@@ -56,7 +55,7 @@ bool shiny_combobox_option(Clay_Context *context, const char *element_id,
 			shiny_element_configure(&content);
 
 			Clay_OnHover(on_hover, 0);
-			shiny_text_element_open(context, value, font_size);
+			shiny_text_element_open(value, font_size);
 		}
 		shiny_element_close();
 	}

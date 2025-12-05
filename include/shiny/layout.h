@@ -1,7 +1,5 @@
 #pragma once
 
-#include "shiny/internal/context.h"
-
 #include <SDL3/SDL_stdinc.h>
 
 typedef enum shiny_layout_flag_t: Uint16
@@ -28,6 +26,6 @@ typedef enum shiny_layout_flag_t: Uint16
 	SHINY_PADDING_DEFAULT = 1 << 10,
 } shiny_layout_flag_t;
 
-void shiny_layout_begin(Clay_Context *context, const char *element_id, shiny_layout_flag_t flags);
+void shiny_layout_begin(const char *element_id, shiny_layout_flag_t flags);
 
 void shiny_layout_end();

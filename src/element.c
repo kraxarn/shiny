@@ -6,10 +6,8 @@
 
 #include <SDL3/SDL_stdinc.h>
 
-void shiny_element_open(Clay_Context *context, const char *element_id)
+void shiny_element_open(const char *element_id)
 {
-	Clay_SetCurrentContext(context);
-
 	if (element_id == nullptr)
 	{
 		Clay__OpenElement();
@@ -24,10 +22,8 @@ void shiny_element_open(Clay_Context *context, const char *element_id)
 	Clay__OpenElementWithId(CLAY_SID(str));
 }
 
-void shiny_text_element_open(Clay_Context *context, const char *text, const Uint16 font_size)
+void shiny_text_element_open(const char *text, const Uint16 font_size)
 {
-	Clay_SetCurrentContext(context);
-
 	const Clay_String str = {
 		.isStaticallyAllocated = false,
 		.length = SDL_strlen(text),

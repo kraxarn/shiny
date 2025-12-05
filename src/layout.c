@@ -78,9 +78,9 @@ static Clay_Padding map_padding(const shiny_layout_flag_t flag)
 	return (Clay_Padding){};
 }
 
-void shiny_layout_begin(Clay_Context *context, const char *element_id, const shiny_layout_flag_t flags)
+void shiny_layout_begin(const char *element_id, const shiny_layout_flag_t flags)
 {
-	shiny_element_open(context, element_id);
+	shiny_element_open(element_id);
 
 	const Clay_ElementDeclaration element = {
 		.layout = (Clay_LayoutConfig){

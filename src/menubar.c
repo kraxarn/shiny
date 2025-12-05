@@ -6,9 +6,9 @@
 
 #include "clay.h"
 
-void shiny_menubar_begin(Clay_Context *context, const char *element_id)
+void shiny_menubar_begin(const char *element_id)
 {
-	shiny_element_open(context, element_id);
+	shiny_element_open(element_id);
 
 	const Clay_ElementDeclaration element = {
 		.layout = (Clay_LayoutConfig){

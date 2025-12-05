@@ -36,10 +36,10 @@ static void on_hover(const Clay_ElementId element_id, const Clay_PointerData poi
 	}
 }
 
-bool shiny_combobox_begin(Clay_Context *context, const char *element_id,
-	const char *value, const Uint16 font_size, const int item_count)
+bool shiny_combobox_begin(const char *element_id, const char *value,
+	const Uint16 font_size, const int item_count)
 {
-	shiny_element_open(context, element_id);
+	shiny_element_open(element_id);
 	is_open = shiny_element_hash_id(element_id) == current;
 
 	const Clay_ElementDeclaration container = {
@@ -61,15 +61,15 @@ bool shiny_combobox_begin(Clay_Context *context, const char *element_id,
 	};
 	shiny_element_configure(&container);
 
-	shiny_text_element_open(context, value, font_size);
-	shiny_h_spacer(context);
-	shiny_text_element_open(context, (int) is_open ? "^" : "V", font_size); // TODO: Icons
+	shiny_text_element_open(value, font_size);
+	shiny_h_spacer();
+	shiny_text_element_open((int) is_open ? "^" : "V", font_size); // TODO: Icons
 
 	Clay_OnHover(on_hover, 0);
 
 	if (is_open)
 	{
-		shiny_element_open(context, nullptr);
+		shiny_element_open(nullptr);
 
 		const Clay_ElementDeclaration options = {
 			.floating = (Clay_FloatingElementConfig){

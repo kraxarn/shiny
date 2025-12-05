@@ -63,10 +63,9 @@ static void on_window_title_hover(const Clay_ElementId element_id, const Clay_Po
 	}
 }
 
-static void window_title(Clay_Context *context, const char *element_id,
-	const char *title, const Uint16 font_size)
+static void window_title(const char *element_id, const char *title, const Uint16 font_size)
 {
-	shiny_element_open(context, nullptr);
+	shiny_element_open(nullptr);
 	{
 		const Clay_ElementDeclaration element = {
 			.layout = (Clay_LayoutConfig){
@@ -89,14 +88,14 @@ static void window_title(Clay_Context *context, const char *element_id,
 		shiny_element_configure(&element);
 
 		Clay_OnHover(on_window_title_hover, (intptr_t) element_id);
-		shiny_text_element_open(context, title, font_size);
+		shiny_text_element_open(title, font_size);
 	}
 	shiny_element_close();
 }
 
-static void window_content_begin(Clay_Context *context)
+static void window_content_begin()
 {
-	shiny_element_open(context, nullptr);
+	shiny_element_open(nullptr);
 
 	const Clay_ElementDeclaration wrapper = {
 		.layout = (Clay_LayoutConfig){
@@ -122,10 +121,10 @@ static void window_content_end()
 	shiny_element_close();
 }
 
-void shiny_window_begin(Clay_Context *context, const char *element_id, const SDL_FRect size,
+void shiny_window_begin(const char *element_id, const SDL_FRect size,
 	const char *title, const Uint16 title_font_size)
 {
-	shiny_element_open(context, element_id);
+	shiny_element_open(element_id);
 
 	Clay_ElementDeclaration element = {
 		.floating = (Clay_FloatingElementConfig){
@@ -156,8 +155,8 @@ void shiny_window_begin(Clay_Context *context, const char *element_id, const SDL
 
 	shiny_element_configure(&element);
 
-	window_title(context, element_id, title, title_font_size);
-	window_content_begin(context);
+	window_title(element_id, title, title_font_size);
+	window_content_begin();
 }
 
 void shiny_window_end()
