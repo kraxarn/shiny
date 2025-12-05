@@ -45,7 +45,6 @@ static constexpr auto glyph_padding = 4;
 
 typedef struct shiny_glyph_info_t
 {
-	int value; // TODO: Remove?
 	int offset_x;
 	int offset_y;
 	int advance_x;
@@ -114,8 +113,6 @@ bool shiny_font_bake(shiny_font_t *font)
 		{
 			return SDL_SetError("Invalid codepoint: %d", codepoint);
 		}
-
-		glyphs[i].value = codepoint;
 
 		stbtt_GetGlyphBitmapBox(&font_info, index, scale, scale,
 			&glyph->offset_x, &glyph->offset_y, nullptr, nullptr
@@ -203,7 +200,7 @@ bool shiny_font_bake(shiny_font_t *font)
 	{
 		if (!rects[i].was_packed)
 		{
-			SDL_LogWarn(SHINY_LOG_CATEGORY_FONT, "Invalid character for packaging: '%c'", glyphs[i].value);
+			SDL_LogWarn(SHINY_LOG_CATEGORY_FONT, "Invalid character for packaging: '%c'", ascii_begin + i);
 			continue;
 		}
 
