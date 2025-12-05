@@ -6,12 +6,9 @@
 
 #include "clay.h"
 
-#include <SDL3/SDL_log.h>
 #include <SDL3/SDL_properties.h>
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_stdinc.h>
-
-#include "shiny/internal/logcategory.h"
 
 static SDL_PropertiesID offsets = 0;
 static SDL_PropertiesID positions = 0;
