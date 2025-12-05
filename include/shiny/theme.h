@@ -1,12 +1,12 @@
 #pragma once
 
-#include "shiny/color.h"
 #include "shiny/themekey.h"
 
+#include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_stdinc.h>
 
-shiny_color_t shiny_theme_color(shiny_theme_color_t key);
-void shiny_theme_set_color(shiny_theme_color_t key, shiny_color_t value);
+SDL_Color shiny_theme_color(shiny_theme_color_t key);
+void shiny_theme_set_color(shiny_theme_color_t key, SDL_Color value);
 
 Uint16 shiny_theme_gap(shiny_theme_gap_t key);
 void shiny_theme_set_gap(shiny_theme_gap_t key, Uint16 value);

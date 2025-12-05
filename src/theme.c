@@ -1,21 +1,21 @@
 #include "shiny/theme.h"
-#include "shiny/color.h"
 #include "shiny/themekey.h"
 
+#include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_stdinc.h>
 
-shiny_color_t colors[SHINY_COLOR_SIZE];
+SDL_Color colors[SHINY_COLOR_SIZE];
 Uint16 gaps[SHINY_GAP_SIZE];
 float corner_radiuses[SHINY_CORNER_RADIUS_SIZE];
 Uint16 paddings[SHINY_PADDING_SIZE];
 float sizes[SHINY_SIZE_SIZE];
 
-shiny_color_t shiny_theme_color(const shiny_theme_color_t key)
+SDL_Color shiny_theme_color(const shiny_theme_color_t key)
 {
 	return colors[key];
 }
 
-void shiny_theme_set_color(const shiny_theme_color_t key, const shiny_color_t value)
+void shiny_theme_set_color(const shiny_theme_color_t key, const SDL_Color value)
 {
 	colors[key] = value;
 }
@@ -65,12 +65,12 @@ void shiny_default_theme()
 	// Oil 6 Palette by GrafxKid
 	// https://lospec.com/palette-list/oil-6
 
-	constexpr shiny_color_t color1 = 0xfb'f5'ef;
-	constexpr shiny_color_t color2 = 0xf2'd3'ab;
-	constexpr shiny_color_t color3 = 0xc6'9f'a5;
-	constexpr shiny_color_t color4 = 0x8b'6d'9c;
-	constexpr shiny_color_t color5 = 0x49'4d'7e;
-	constexpr shiny_color_t color6 = 0x27'27'44;
+	const SDL_Color color1 = {.r = 0xfb, .g = 0xf5, .b = 0xef, .a = SDL_ALPHA_OPAQUE};
+	const SDL_Color color2 = {.r = 0xf2, .g = 0xd3, .b = 0xab, .a = SDL_ALPHA_OPAQUE};
+	const SDL_Color color3 = {.r = 0xc6, .g = 0x9f, .b = 0xa5, .a = SDL_ALPHA_OPAQUE};
+	const SDL_Color color4 = {.r = 0x8b, .g = 0x6d, .b = 0x9c, .a = SDL_ALPHA_OPAQUE};
+	const SDL_Color color5 = {.r = 0x49, .g = 0x4d, .b = 0x7e, .a = SDL_ALPHA_OPAQUE};
+	const SDL_Color color6 = {.r = 0x27, .g = 0x27, .b = 0x44, .a = SDL_ALPHA_OPAQUE};
 
 	shiny_theme_set_color(SHINY_COLOR_FOREGROUND, color1);
 	shiny_theme_set_color(SHINY_COLOR_WINDOW_BACKGROUND, color5);

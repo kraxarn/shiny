@@ -1,6 +1,6 @@
 #include "shiny/font.h"
+#include "shiny/theme.h"
 #include "shiny/themekey.h"
-#include "shiny/internal/color.h"
 #include "shiny/internal/logcategory.h"
 
 #include <SDL3/SDL_assert.h>
@@ -262,7 +262,7 @@ shiny_font_t *shiny_font_create(SDL_Renderer *renderer, const Uint8 *data)
 
 	font->renderer = renderer;
 	font->data = data;
-	font->color = shiny_sdl_theme_color(SHINY_COLOR_FOREGROUND);
+	font->color = shiny_theme_color(SHINY_COLOR_FOREGROUND);
 
 	if (!shiny_font_bake(font))
 	{
