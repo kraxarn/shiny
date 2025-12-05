@@ -3,7 +3,7 @@
 ## What is Shiny?
 
 Shiny is a UI library based on the [clay](https://github.com/kraxarn/clay) layout library.
-It's primarily intended for use SDL3 and C, and designed around the [chirp](https://github.com/kraxarn/chirp)
+It's primarily intended for use with SDL3 and C, and designed around the [chirp](https://github.com/kraxarn/chirp)
 game engine, but I can't stop you from using it for other purposes as well.
 
 ## Status
