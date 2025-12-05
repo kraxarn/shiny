@@ -58,7 +58,6 @@ static void on_window_title_hover(const Clay_ElementId element_id, const Clay_Po
 
 		position->x = pointer_data.position.x - offset->x;
 		position->y = pointer_data.position.y - offset->y;
-		SDL_LogDebug(SHINY_LOG_CATEGORY_ELEMENT, "%.0f %.0f", position->x, position->y);
 	}
 
 	if (pointer_data.state == CLAY_POINTER_DATA_RELEASED_THIS_FRAME)
