@@ -23,9 +23,11 @@ void shiny_menu_hide()
 	visible = false;
 }
 
-bool shiny_menu_begin(const char *element_id)
+bool shiny_menu_begin(const char *element_id, const char *text, const Uint16 font_size)
 {
 	shiny_element_open(element_id);
+
+	shiny_text_element_open(text, font_size);
 
 	Clay_OnHover(on_hover, 0);
 
@@ -34,12 +36,7 @@ bool shiny_menu_begin(const char *element_id)
 		return false;
 	}
 
-	const Clay_String str = {
-		.isStaticallyAllocated = true,
-		.length = SDL_strlen(element_id),
-		.chars = element_id,
-	};
-	return Clay__HashString(str, 0).id == current;
+	return shiny_element_hash_id(element_id) == current;
 }
 
 void shiny_menu_end()
