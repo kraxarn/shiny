@@ -1,8 +1,8 @@
 #include "shiny/menu.h"
 #include "shiny/internal/menu.h"
-#include "shiny/menuitems.h"
 #include "shiny/theme.h"
 #include "shiny/themekey.h"
+#include "shiny/internal/color.h"
 #include "shiny/internal/element.h"
 
 #include <SDL3/SDL_stdinc.h>
@@ -40,6 +40,28 @@ static void menu_content_end()
 	shiny_element_close();
 }
 
+static void menu_items_begin()
+{
+	shiny_element_open(nullptr);
+
+	const Clay_ElementDeclaration element = {
+		.layout = (Clay_LayoutConfig){
+			.layoutDirection = CLAY_TOP_TO_BOTTOM,
+			.sizing = (Clay_Sizing){
+				.width = CLAY_SIZING_FIXED(200),
+			},
+		},
+		.cornerRadius = CLAY_CORNER_RADIUS(shiny_theme_corner_radius(SHINY_CORNER_RADIUS_DEFAULT)),
+		.backgroundColor = shiny_clay_theme_color(SHINY_COLOR_WINDOW_BACKGROUND),
+	};
+	shiny_element_configure(&element);
+}
+
+static void menu_items_end()
+{
+	shiny_element_close();
+}
+
 static void on_hover(const Clay_ElementId element_id, const Clay_PointerData pointer_data,
 	[[maybe_unused]] intptr_t user_data)
 {
@@ -71,7 +93,7 @@ bool shiny_menu_begin(const char *element_id, const char *text, const Uint16 fon
 	}
 
 	menu_content_begin();
-	shiny_menu_items_begin();
+	menu_items_begin();
 
 	open = true;
 	return true;
@@ -81,7 +103,7 @@ void shiny_menu_end()
 {
 	if (open)
 	{
-		shiny_menu_items_end();
+		menu_items_end();
 		menu_content_end();
 	}
 
