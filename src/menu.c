@@ -1,7 +1,8 @@
 #include "shiny/menu.h"
 #include "shiny/internal/menu.h"
-#include "shiny/menucontent.h"
 #include "shiny/menuitems.h"
+#include "shiny/theme.h"
+#include "shiny/themekey.h"
 #include "shiny/internal/element.h"
 
 #include <SDL3/SDL_stdinc.h>
@@ -9,6 +10,35 @@
 static auto visible = false;
 static bool open;
 static Uint32 current = 0;
+
+static void menu_content_begin()
+{
+	shiny_element_open(nullptr);
+
+	const Clay_ElementDeclaration element = {
+		.floating = (Clay_FloatingElementConfig){
+			.attachTo = CLAY_ATTACH_TO_PARENT,
+			.attachPoints = (Clay_FloatingAttachPoints){
+				.parent = CLAY_ATTACH_POINT_LEFT_BOTTOM,
+			},
+		},
+		.layout = (Clay_LayoutConfig){
+			.sizing = (Clay_Sizing){
+				.width = CLAY_SIZING_FIXED(200),
+			},
+			.padding = (Clay_Padding){
+				.top = shiny_theme_padding(SHINY_PADDING_MENUBAR)
+				+ shiny_theme_gap(SHINY_GAP_DEFAULT),
+			},
+		},
+	};
+	shiny_element_configure(&element);
+}
+
+static void menu_content_end()
+{
+	shiny_element_close();
+}
 
 static void on_hover(const Clay_ElementId element_id, const Clay_PointerData pointer_data,
 	[[maybe_unused]] intptr_t user_data)
@@ -40,7 +70,7 @@ bool shiny_menu_begin(const char *element_id, const char *text, const Uint16 fon
 		return false;
 	}
 
-	shiny_menu_content_begin();
+	menu_content_begin();
 	shiny_menu_items_begin();
 
 	open = true;
@@ -52,7 +82,7 @@ void shiny_menu_end()
 	if (open)
 	{
 		shiny_menu_items_end();
-		shiny_menu_content_end();
+		menu_content_end();
 	}
 
 	shiny_element_close();
