@@ -1,10 +1,12 @@
 #include "shiny/menu.h"
 #include "shiny/internal/menu.h"
+#include "shiny/menucontent.h"
 #include "shiny/internal/element.h"
 
 #include <SDL3/SDL_stdinc.h>
 
 static auto visible = false;
+static bool open;
 static Uint32 current = 0;
 
 static void on_hover(const Clay_ElementId element_id, const Clay_PointerData pointer_data,
@@ -31,16 +33,25 @@ bool shiny_menu_begin(const char *element_id, const char *text, const Uint16 fon
 
 	Clay_OnHover(on_hover, 0);
 
-	if (!visible)
+	if (!visible || shiny_element_hash_id(element_id) != current)
 	{
+		open = false;
 		return false;
 	}
 
-	return shiny_element_hash_id(element_id) == current;
+	shiny_menu_content_begin();
+
+	open = true;
+	return true;
 }
 
 void shiny_menu_end()
 {
+	if (open)
+	{
+		shiny_menu_content_end();
+	}
+
 	shiny_element_close();
 }
 
