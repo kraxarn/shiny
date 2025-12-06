@@ -85,6 +85,7 @@ bool shiny_menu_item_end()
 		return false;
 	}
 
+	SDL_ClearProperty(states, current_element_id);
 	shiny_menubar_item_hide();
 	return true;
 }
