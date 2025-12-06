@@ -4,7 +4,7 @@
 #include "shiny/internal/color.h"
 #include "shiny/internal/element.h"
 #include "shiny/internal/logcategory.h"
-#include "shiny/internal/menubaritem.h"
+#include "shiny/internal/menu.h"
 
 #include "clay.h"
 
@@ -86,6 +86,6 @@ bool shiny_menu_item_end()
 	}
 
 	SDL_ClearProperty(states, current_element_id);
-	shiny_menubar_item_hide();
+	shiny_menu_hide();
 	return true;
 }

@@ -1,5 +1,5 @@
-#include "shiny/menubaritem.h"
-#include "shiny/internal/menubaritem.h"
+#include "shiny/menu.h"
+#include "shiny/internal/menu.h"
 #include "shiny/internal/element.h"
 
 #include <SDL3/SDL_stdinc.h>
@@ -18,12 +18,12 @@ static void on_hover(const Clay_ElementId element_id, const Clay_PointerData poi
 	}
 }
 
-void shiny_menubar_item_hide()
+void shiny_menu_hide()
 {
 	visible = false;
 }
 
-bool shiny_menubar_item_begin(const char *element_id)
+bool shiny_menu_begin(const char *element_id)
 {
 	shiny_element_open(element_id);
 
@@ -42,7 +42,7 @@ bool shiny_menubar_item_begin(const char *element_id)
 	return Clay__HashString(str, 0).id == current;
 }
 
-void shiny_menubar_item_end()
+void shiny_menu_end()
 {
 	shiny_element_close();
 }
