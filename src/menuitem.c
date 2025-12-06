@@ -1,4 +1,6 @@
 #include "shiny/menuitem.h"
+#include "shiny/image.h"
+#include "shiny/size.h"
 #include "shiny/theme.h"
 #include "shiny/themekey.h"
 #include "shiny/internal/color.h"
@@ -10,10 +12,10 @@
 
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_properties.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_stdinc.h>
 
 static SDL_PropertiesID states;
-
-static const char *current_element_id;
 
 static void on_hover([[maybe_unused]] const Clay_ElementId element_id,
 	const Clay_PointerData pointer_data, [[maybe_unused]] intptr_t user_data)
@@ -26,7 +28,8 @@ static void on_hover([[maybe_unused]] const Clay_ElementId element_id,
 	SDL_SetNumberProperty(states, element_id.stringId.chars, pointer_data.state);
 }
 
-void shiny_menu_item_begin(const char *element_id)
+void menu_item_begin(const char *element_id, const char *text, const Uint16 font_size,
+	SDL_Texture *icon, const shiny_size_t *icon_size)
 {
 	// We need an element ID for hashing
 	if (element_id == nullptr)
@@ -71,21 +74,43 @@ void shiny_menu_item_begin(const char *element_id)
 	};
 	shiny_element_configure(&content);
 
-	current_element_id = element_id;
+	if (icon != nullptr)
+	{
+		shiny_image(icon, icon_size);
+	}
+	shiny_text_element_open(text, font_size);
 }
 
-bool shiny_menu_item_end()
+static void menu_item_end()
 {
 	shiny_element_close(); // content
 	shiny_element_close(); // container
+}
 
-	const Clay_PointerDataInteractionState state = SDL_GetNumberProperty(states, current_element_id, -1);
+static bool clicked(const char *element_id)
+{
+	const Clay_PointerDataInteractionState state = SDL_GetNumberProperty(states, element_id, -1);
 	if (state != CLAY_POINTER_DATA_PRESSED_THIS_FRAME)
 	{
 		return false;
 	}
 
-	SDL_ClearProperty(states, current_element_id);
+	SDL_ClearProperty(states, element_id);
 	shiny_menu_hide();
 	return true;
+}
+
+bool shiny_menu_item(const char *element_id, const char *text, const Uint16 font_size)
+{
+	menu_item_begin(element_id, text, font_size, nullptr, nullptr);
+	menu_item_end();
+	return clicked(element_id);
+}
+
+bool shiny_menu_item_icon(const char *element_id, const char *text, Uint16 font_size, SDL_Texture *icon,
+	const shiny_size_t *icon_size)
+{
+	menu_item_begin(element_id, text, font_size, icon, icon_size);
+	menu_item_end();
+	return clicked(element_id);
 }
