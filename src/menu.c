@@ -1,6 +1,7 @@
 #include "shiny/menu.h"
 #include "shiny/internal/menu.h"
 #include "shiny/menucontent.h"
+#include "shiny/menuitems.h"
 #include "shiny/internal/element.h"
 
 #include <SDL3/SDL_stdinc.h>
@@ -40,6 +41,7 @@ bool shiny_menu_begin(const char *element_id, const char *text, const Uint16 fon
 	}
 
 	shiny_menu_content_begin();
+	shiny_menu_items_begin();
 
 	open = true;
 	return true;
@@ -49,6 +51,7 @@ void shiny_menu_end()
 {
 	if (open)
 	{
+		shiny_menu_items_end();
 		shiny_menu_content_end();
 	}
 
